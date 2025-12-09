@@ -56,112 +56,162 @@ function det3x3(A) {
   return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
 }
 
-// ======================
-// PIVOTÁLÁS LOGIKA
-// ======================
-
-function getPreferredPivotRow(A, colIndex) {
-  const n = A.length;
-  let candidates = [];
-
-  for (let r = colIndex; r < n; r++) {
-    const val = A[r][colIndex];
-    if (Math.abs(val) > 1e-9) { 
-      candidates.push({ row: r, val: val, abs: Math.abs(val) });
+function countExactValue(A, val) {
+  let count = 0;
+  for(let r=0; r<3; r++){
+    for(let c=0; c<3; c++){
+       if (Math.abs(A[r][c] - val) < 1e-9) count++;
     }
   }
+  return count;
+}
 
-  if (candidates.length === 0) return -1;
+// ======================
+// PIVOTÁLÁS LOGIKA (Globális keresés, kötetlen sorrend)
+// ======================
 
-  for (let cand of candidates) {
-    if (Math.abs(cand.abs - 1) < 1e-9) {
-      return cand.row; 
+/**
+ * Megkeresi a legjobb pivotot (1 vagy -1) a TELJES mátrixban,
+ * de csak olyan sorban és oszlopban, ami még nincs "kész" (nincs a halmazokban).
+ */
+function findBestPivotGlobal(A, usedRows, solvedCols) {
+    const n = A.length;
+    let candidates = [];
+
+    for (let r = 0; r < n; r++) {
+        if (usedRows.has(r)) continue; // Ez a sor már foglalt
+
+        for (let c = 0; c < n; c++) {
+            if (solvedCols.has(c)) continue; // Ez az oszlop már kész
+
+            const val = A[r][c];
+            if (Math.abs(val) > 1e-9) {
+                 candidates.push({ row: r, col: c, val: val, abs: Math.abs(val) });
+            }
+        }
     }
-  }
 
-  candidates.sort((a, b) => a.abs - b.abs);
-  return candidates[0].row;
+    if (candidates.length === 0) return null;
+
+    // 1. Prioritás: 1 vagy -1
+    for (let cand of candidates) {
+        if (Math.abs(cand.abs - 1) < 1e-9) {
+            return cand; 
+        }
+    }
+
+    // 2. Prioritás: Legkisebb abszolút érték
+    candidates.sort((a, b) => a.abs - b.abs);
+    return candidates[0];
 }
 
 function buildPivotSolutionStepsLatex(Aorig) {
   let A = cloneMatrix(Aorig);
   const n = A.length;
   const steps = [];
-  const swaps = [];
+  
+  const usedRows = new Set();   // Melyik sorban volt már pivot
+  const solvedCols = new Set(); // Melyik oszlopot oldottuk már meg
+  const rowMapping = [];        // rowMapping[col] = melyik sorban van a pivotja
 
-  for (let col = 0; col < n; col++) {
-    // 1. Pivot keresés
-    const pivotRowIndex = getPreferredPivotRow(A, col);
-    if (pivotRowIndex === -1) return "\\text{Szinguláris mátrix.}";
+  // 3 lépés (mert 3x3)
+  for (let step = 0; step < n; step++) {
+      
+      // Keresés bárhol a maradék mátrixban
+      const pivotObj = findBestPivotGlobal(A, usedRows, solvedCols);
+      
+      if (!pivotObj) return "\\text{A mátrix szinguláris.}";
 
-    // Mentés pivot jelöléssel
-    steps.push({
-      latex: matrixToLatexWithPivot(A, pivotRowIndex, col),
-      desc: `A^${col > 0 ? "(" + col + ")" : ""}`
-    });
+      const pRow = pivotObj.row;
+      const pCol = pivotObj.col;
 
-    // 2. Sorcsere
-    if (pivotRowIndex !== col) {
-      let tmp = A[col];
-      A[col] = A[pivotRowIndex];
-      A[pivotRowIndex] = tmp;
-      // Szebb formátum: "2. <-> 3. sor"
-      swaps.push(`\\text{${col + 1}. sor} \\leftrightarrow \\text{${pivotRowIndex + 1}. sor}`);
-    }
+      // Regisztráljuk
+      usedRows.add(pRow);
+      solvedCols.add(pCol);
+      rowMapping[pCol] = pRow;
 
-    const pivotVal = A[col][col];
+      // 1. Állapot: Pivot kijelölése
+      // A leírásban jelezzük, melyik oszlopot célozzuk
+      steps.push({
+          latex: matrixToLatexWithPivot(A, pRow, pCol),
+          desc: `\\text{Pivot: } a_{${pRow+1},${pCol+1}}`
+      });
 
-    // 3. Normálás
-    for (let j = 0; j < n; j++) {
-      A[col][j] /= pivotVal;
-    }
-    A[col][col] = 1;
+      const pivotVal = A[pRow][pCol];
 
-    // 4. Kinullázás
-    for (let r = 0; r < n; r++) {
-      if (r === col) continue;
-      const factor = A[r][col];
-      if (Math.abs(factor) < 1e-9) continue;
-      for (let c = 0; c < n; c++) {
-        A[r][c] -= factor * A[col][c];
+      // 2. Normálás
+      for (let j = 0; j < n; j++) {
+          A[pRow][j] /= pivotVal;
       }
-      A[r][col] = 0;
-    }
+      A[pRow][pCol] = 1; 
+
+      // 3. Kinullázás (minden más sorban az adott oszlop mentén)
+      for (let r = 0; r < n; r++) {
+          if (r === pRow) continue; 
+
+          const factor = A[r][pCol];
+          if (Math.abs(factor) < 1e-9) continue;
+
+          for (let c = 0; c < n; c++) {
+              A[r][c] -= factor * A[pRow][c];
+          }
+          A[r][pCol] = 0;
+      }
   }
 
-  // Végső állapot
+  // --- VÉGSŐ RENDEZÉS DETEKTÁLÁSA ---
+  let needsSwap = false;
+  for(let k=0; k<n; k++) {
+      if (rowMapping[k] !== k) {
+          needsSwap = true;
+      }
+  }
+
+  // Utolsó számított állapot
   steps.push({
-    latex: matrixToLatex(A),
-    desc: `A^{(3)} = I`
+      latex: matrixToLatex(A),
+      isPreFinal: true
   });
 
-  // --- Output Generálás (Javított elrendezés) ---
+  if (needsSwap) {
+      // Végső állapot (Tiszta I)
+      let finalI = [
+          [1,0,0], [0,1,0], [0,0,1]
+      ];
+      steps.push({
+          latex: matrixToLatex(finalI),
+          isFinal: true,
+          swapText: "\\text{Sorok rendezése}"
+      });
+  } else {
+      steps[steps.length-1].isFinal = true;
+  }
+
+  // --- OUTPUT GENERÁLÁS ---
   let latexOutput = `\\begin{aligned}\n`;
 
-  // Minden lépés az utolsó kivételével
-  for (let i = 0; i < steps.length - 1; i++) {
+  for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
+      
       if (i === 0) {
           latexOutput += `A^{(0)} &= ${step.latex} \\\\[6pt]\n`;
-      } else {
+      } 
+      else if (step.isFinal) {
+          if (step.swapText) {
+             latexOutput += `\\xrightarrow{\\text{rendezés}} \\quad & ${step.latex}\n`;
+          } else {
+             latexOutput += `\\rightarrow \\quad & ${step.latex}\n`;
+          }
+      }
+      else {
           latexOutput += `\\rightarrow \\quad & ${step.latex} \\\\[6pt]\n`;
       }
   }
-
-  // ITT JÖN A SORCSERE SZÖVEG (ha van)
-  if (swaps.length > 0) {
-      // Egy "üres" sorba írjuk a szöveget, hogy az utolsó előtti mátrix ALÁ kerüljön
-      latexOutput += `& \\text{Végrehajtott sorcserék: } ${swaps.join(", ")} \\\\[6pt]\n`;
-  }
-
-  // Végül az utolsó mátrix (Egységmátrix)
-  const finalStep = steps[steps.length - 1];
-  latexOutput += `\\rightarrow \\quad & ${finalStep.latex}\n`;
-
+  
   latexOutput += `\\end{aligned}`;
-
   return latexOutput;
 }
+
 
 // ======================
 // GENERÁTOROK
@@ -173,13 +223,15 @@ function generateComplexIntegerMatrix() {
       [0, 1, 0],
       [0, 0, 1]
     ];
-    const iterations = randInt(8, 15); 
+    const iterations = randInt(12, 22); 
     for (let i = 0; i < iterations; i++) {
       const r1 = randInt(0, 2);
       const r2 = randInt(0, 2);
       if (r1 === r2) continue;
-      let k = randInt(-3, 3);
+      
+      let k = randInt(-3, 3); 
       if (k === 0) k = 1; 
+      
       for (let c = 0; c < 3; c++) {
         A[r1][c] += k * A[r2][c];
       }
@@ -187,26 +239,95 @@ function generateComplexIntegerMatrix() {
     return A;
 }
 
-// 1. Pivotálás feladat generátor
-function generatePivotMatrix3x3() {
-  while (true) {
-    let A = generateComplexIntegerMatrix();
-    const col1Vals = [Math.abs(A[0][0]), Math.abs(A[1][0]), Math.abs(A[2][0])];
-    const hasOneInCol1 = col1Vals.some(v => Math.abs(v - 1) < 0.1);
-    if (!hasOneInCol1) continue;
+/**
+ * SZIMULÁCIÓ (Globális): 
+ * Ellenőrzi, hogy a mátrix megoldható-e egész számokkal, 
+ * ha BÁRMELYIK oszlopban kezdhetünk, ahol +/- 1 van.
+ */
+function canBeSolvedWithIntegersGlobal(Aorig) {
+    let A = cloneMatrix(Aorig);
+    let usedRows = new Set();
+    let solvedCols = new Set();
+    const n = 3;
 
-    let zeroCount = 0;
-    let maxVal = 0;
-    for(let r=0; r<3; r++){
-        for(let c=0; c<3; c++){
-            if(Math.abs(A[r][c]) < 0.1) zeroCount++;
-            if(Math.abs(A[r][c]) > maxVal) maxVal = Math.abs(A[r][c]);
+    // 3 lépés
+    for (let step = 0; step < n; step++) {
+        // Keressünk +/- 1 pivotot bárhol a maradékban
+        let foundPivot = null;
+
+        // "Okos" keresés: először 1/-1-et keresünk
+        for (let r = 0; r < n; r++) {
+            if (usedRows.has(r)) continue;
+            for (let c = 0; c < n; c++) {
+                if (solvedCols.has(c)) continue;
+                
+                if (Math.abs(Math.abs(A[r][c]) - 1) < 1e-9) {
+                    foundPivot = {r, c};
+                    break; 
+                }
+            }
+            if (foundPivot) break;
+        }
+
+        // Ha nem találtunk 1-est sehol a szabad helyeken, akkor ez nem jó mátrix
+        // (mert törtek jönnének)
+        if (!foundPivot) return false;
+
+        const pRow = foundPivot.r;
+        const pCol = foundPivot.c;
+
+        usedRows.add(pRow);
+        solvedCols.add(pCol);
+        
+        // Elimináció szimulálása (fontos, mert a többi elem változik!)
+        let pivotVal = A[pRow][pCol]; // +/- 1
+        
+        // Normálás
+        for(let j=0; j<n; j++) A[pRow][j] /= pivotVal;
+        A[pRow][pCol] = 1;
+
+        // Kinullázás
+        for(let r=0; r<n; r++) {
+            if (r !== pRow) {
+                let f = A[r][pCol];
+                if (Math.abs(f) > 1e-9) {
+                    for(let c=0; c<n; c++) A[r][c] -= f * A[pRow][c];
+                }
+            }
         }
     }
-    if (zeroCount > 2) continue;
-    if (maxVal < 5 || maxVal > 25) continue;
+    return true;
+}
+
+
+// 1. Pivotálás feladat generátor
+function generatePivotMatrix3x3() {
+  let attempts = 0;
+  
+  while (attempts < 20000) {
+    attempts++;
+    
+    let A = generateComplexIntegerMatrix();
+
+    const zeroCount = countExactValue(A, 0);
+    const oneCount = countExactValue(A, 1);
+    const minusOneCount = countExactValue(A, -1);
+
+    if (zeroCount > 1) continue;
+    if (oneCount > 1) continue;
+    if (minusOneCount > 1) continue;
+
+    let maxVal = 0;
+    A.flat().forEach(x => maxVal = Math.max(maxVal, Math.abs(x)));
+    if (maxVal < 4 || maxVal > 30) continue;
+
+    // A frissített, "globális" szimulációt használjuk
+    if (!canBeSolvedWithIntegersGlobal(A)) continue;
+
     return A;
   }
+  
+  return [[1, 2, 5], [2, 5, 12], [1, 3, 4]]; 
 }
 
 // 2. Inverz feladat generátor
@@ -324,7 +445,7 @@ function generateExamVariant(variantIndex, types) {
 
   let taskCounter = 1;
 
-  // 1. Pivotálás (CSAK CÍM + MÁTRIX)
+  // 1. Pivotálás
   if (includePivot) {
     const pivotMatrix = generatePivotMatrix3x3();
     const latexM = matrixToLatex(pivotMatrix);
