@@ -6,15 +6,17 @@
   <title>Pivot Point – Lineáris Algebra ZH generátor</title>
 
   <!-- MathJax konfiguráció (LaTeX render) -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      },
-      svg: { fontCache: 'global' }
-    };
-  </script>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      packages: { '[+]': ['color'] }   // SZÍNEKHEZ KELL
+    },
+    svg: { fontCache: 'global' }
+  };
+</script>
+
 
   <!-- MathJax: SVG output (nyomtatásban is szép) -->
   <script
@@ -73,8 +75,9 @@
         </h1>
 
         <p class="hero-subtitle">
-          A jelenlegi demó 3×3-as mátrixok inverzét kérdező feladatokat generál.
-          Minden feladatnak létezik „szép”, egész elemes inverze.
+          A jelenlegi demó 3×3-as mátrixokkal foglalkozó feladatokat generál:
+          pivotálás, mátrixinverz, determináns, lineáris egyenletrendszer.
+          Minden feladatnak „szép”, egész elemes megoldása van.
         </p>
 
         <div class="hero-actions">
@@ -97,9 +100,9 @@
         <div class="hero-card-header">
           <div>
             <div class="hero-card-title">Aktuális demó</div>
-            <small>Mátrixinverz feladatok</small>
+            <small>3×3-as feladatok</small>
           </div>
-          <div class="hero-badge">3×3 inverz</div>
+          <div class="hero-badge">LA ZH</div>
         </div>
 
         <div class="hero-card-list">
@@ -113,8 +116,8 @@
           <div class="hero-card-item">
             <div class="hero-card-bullet">2</div>
             <div>
-              Minden feladat alatt közvetlenül a saját
-              <strong>megoldókulcsa</strong> jelenik meg (ha bekapcsolod).
+              Válaszd ki, mely feladattípusok kerüljenek bele:
+              pivotálás, inverz, determináns, egyenletrendszer.
             </div>
           </div>
           <div class="hero-card-item">
@@ -126,7 +129,7 @@
         </div>
 
         <div class="hero-card-footer">
-          <span>Alap demó – később jönnek a többi feladattípusok.</span>
+          <span>Alap demó – később jönnek a további feladattípusok.</span>
           <span>A PDF-nél használd a böngésző „Mentés PDF-be” opcióját.</span>
         </div>
       </aside>
@@ -139,7 +142,7 @@
         <p class="section-lead">
           A <strong>Pivot Point</strong> egy oktatást segítő eszköz, amely
           lineáris algebra vizsgafeladatok és ZH-k gyors generálásában segít.
-          A jelenlegi prototípus a 3×3-as mátrixinverz feladattípusra koncentrál.
+          A jelenlegi prototípus 3×3-as mátrixokra épülő feladatokra koncentrál.
         </p>
       </div>
     </section>
@@ -160,8 +163,8 @@
       <div class="section-card section-card-light">
         <h2 class="section-title">Legyen neked is 5-ös Lineáris Algebrából</h2>
         <p class="section-lead">
-          A Pivot Point segítségével célzottan tudsz gyakorolni inverz-mátrix
-          feladatokat is, részletes megoldókulccsal.
+          A Pivot Point segítségével célzottan tudsz gyakorolni különböző
+          lineáris algebrai feladattípusokat, részletes megoldókulccsal.
         </p>
       </div>
     </section>
@@ -171,10 +174,11 @@
       <div class="section-card section-zh-card">
         <div class="section-header-row">
           <div>
-            <h2 class="section-title">ZH feladatsor (3×3 mátrixinverz)</h2>
+            <h2 class="section-title">ZH feladatsor generálása</h2>
             <p class="section-lead">
-              Add meg, hány feladatot szeretnél (pl. 5), majd generáld le a
-              feladatsort. A megoldókulcs minden feladat alatt jelenik meg.
+              Add meg, hány ZH-változatot szeretnél (pl. 5), válaszd ki a
+              feladattípusokat, majd generáld le a feladatsort.
+              A megoldókulcs minden feladat alatt jelenik meg (weben kapcsolható).
             </p>
           </div>
           <div class="badge-soft no-print">Alfa verzió</div>
@@ -184,7 +188,7 @@
           <!-- BAL: BEÁLLÍTÁSOK + GOMBOK (csak weben) -->
           <form id="zh-form" class="zh-form no-print" onsubmit="return false;">
             <div class="field-group field-group-inline">
-              <label for="task-count" class="field-label">Feladatok száma</label>
+              <label for="task-count" class="field-label">ZH-változatok száma</label>
               <input
                 id="task-count"
                 type="number"
@@ -193,7 +197,34 @@
                 value="1"
               />
               <span class="field-hint">
-                1–30 között. Ez vonatkozik a webes nézetre és a PDF-ekre is.
+                1–30 között. Minden változat ugyanolyan feladattípusokból áll,
+                de más számokkal.
+              </span>
+            </div>
+
+            <!-- FELADATTÍPUS-VÁLASZTÓ -->
+            <div class="field-group">
+              <div class="field-label">Feladattípusok</div>
+              <div class="field-row">
+                <label>
+                  <input type="checkbox" id="type-pivot" checked>
+                  1. Pivotálás
+                </label>
+                <label>
+                  <input type="checkbox" id="type-inverse" checked>
+                  2. Mátrixinverz
+                </label>
+                <label>
+                  <input type="checkbox" id="type-det" checked>
+                  3. Determináns
+                </label>
+                <label>
+                  <input type="checkbox" id="type-system" checked>
+                  4. Egyenletrendszer
+                </label>
+              </div>
+              <span class="field-hint">
+                Legalább egyet válassz ki – a beállítás a webes nézetre és a PDF-ekre is érvényes.
               </span>
             </div>
 
@@ -227,11 +258,11 @@
 
             <p class="note-small">
               <strong>Feladatsor generálása</strong> – weben megjelenik az összes
-              feladat, a megoldásokat külön gombbal tudod bekapcsolni.<br />
-              <strong>Feladatlap PDF</strong> – csak a feladatok, minden feladat
+              kiválasztott feladattípus, minden ZH-változatnál.<br />
+              <strong>Feladatlap PDF</strong> – csak a feladatok, minden ZH-változat
               külön oldalon.<br />
-              <strong>Feladat + megoldás PDF</strong> – minden feladat alatt a
-              saját megoldása, páronként külön oldalon.
+              <strong>Feladat + megoldás PDF</strong> – minden feladat alatt a saját
+              megoldása, a ZH-változatok külön oldalon.
             </p>
           </form>
 
@@ -241,8 +272,8 @@
               <h3>ZH feladatok</h3>
               <div id="zhOutput" class="zh-output-div">
                 <p>
-                  Még nem készült feladatsor. Állítsd be a darabszámot, majd kattints
-                  a „Feladatsor generálása” gombra.
+                  Még nem készült feladatsor. Állítsd be a darabszámot és a
+                  feladattípusokat, majd kattints a „Feladatsor generálása” gombra.
                 </p>
               </div>
             </div>
@@ -286,8 +317,8 @@
     </div>
   </footer>
 
+  <!-- JS fájlok -->
   <script src="tasks.js"></script>
   <script src="app.js"></script>
-
 </body>
 </html>

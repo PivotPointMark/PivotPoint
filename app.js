@@ -21,28 +21,36 @@ if (navToggle && navLinks) {
 // Flag: van-e már generált ZH
 let hasGeneratedZh = false;
 
-/* ========= Feladattípus-választás (opcionális) =========
-   Most a HTML-ben nincsenek type-pivot / type-inverse checkboxok,
-   ezért ha nem találja őket, alapból mindkettőt true-ra állítjuk.
-*/
+/* ========= Feladattípus-választás ========= */
 
 function getSelectedTaskTypes() {
   const pivotCb = document.getElementById("type-pivot");
   const inverseCb = document.getElementById("type-inverse");
+  const detCb = document.getElementById("type-det");
+  const systemCb = document.getElementById("type-system");
 
   const includePivot = pivotCb ? pivotCb.checked : true;
   const includeInverse = inverseCb ? inverseCb.checked : true;
+  const includeDet = detCb ? detCb.checked : true;
+  const includeSystem = systemCb ? systemCb.checked : true;
 
-  return { includePivot, includeInverse };
+  return { includePivot, includeInverse, includeDet, includeSystem };
 }
 
 function ensureAtLeastOneTaskTypeSelected() {
-  const { includePivot, includeInverse } = getSelectedTaskTypes();
-  if (!includePivot && !includeInverse) {
+  const types = getSelectedTaskTypes();
+  const {
+    includePivot,
+    includeInverse,
+    includeDet,
+    includeSystem
+  } = types;
+
+  if (!includePivot && !includeInverse && !includeDet && !includeSystem) {
     alert("Válassz ki legalább egy feladattípust!");
     return null;
   }
-  return { includePivot, includeInverse };
+  return types;
 }
 
 /* ========= Feladatszám beolvasása ========= */
@@ -61,10 +69,10 @@ function getTaskCountFromInput() {
 
 /* ========= Több ZH-változat generálása ========= */
 
-function generateFullExam(count, includePivot, includeInverse) {
+function generateFullExam(count, types) {
   let html = "";
   for (let i = 1; i <= count; i++) {
-    html += generateExamVariant(i, includePivot, includeInverse);
+    html += generateExamVariant(i, types);
   }
   return html;
 }
@@ -163,42 +171,30 @@ function printWithMode(modeClass) {
 /* ========= Gombkezelők ========= */
 
 function handleGenerateClick() {
-  const selection = ensureAtLeastOneTaskTypeSelected();
-  if (!selection) return;
+  const types = ensureAtLeastOneTaskTypeSelected();
+  if (!types) return;
 
   const count = getTaskCountFromInput();
-  const html = generateFullExam(
-    count,
-    selection.includePivot,
-    selection.includeInverse
-  );
+  const html = generateFullExam(count, types);
   updateZhOutput(html);
 }
 
 function handlePrintTasksClick() {
-  const selection = ensureAtLeastOneTaskTypeSelected();
-  if (!selection) return;
+  const types = ensureAtLeastOneTaskTypeSelected();
+  if (!types) return;
 
   const count = getTaskCountFromInput();
-  const html = generateFullExam(
-    count,
-    selection.includePivot,
-    selection.includeInverse
-  );
+  const html = generateFullExam(count, types);
   updateZhOutput(html);
   printWithMode("print-mode-tasks");
 }
 
 function handlePrintAllClick() {
-  const selection = ensureAtLeastOneTaskTypeSelected();
-  if (!selection) return;
+  const types = ensureAtLeastOneTaskTypeSelected();
+  if (!types) return;
 
   const count = getTaskCountFromInput();
-  const html = generateFullExam(
-    count,
-    selection.includePivot,
-    selection.includeInverse
-  );
+  const html = generateFullExam(count, types);
   updateZhOutput(html);
   printWithMode("print-mode-all");
 }
@@ -210,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnPrintTasks = document.getElementById("btn-print-tasks");
   const btnPrintAll = document.getElementById("btn-print-all");
   const btnShowSolutions = document.getElementById("btn-show-solutions");
-  const btnSelectAllTypes = document.getElementById("btn-select-all-types");
 
   if (btnGenerate) {
     btnGenerate.addEventListener("click", handleGenerateClick);
@@ -226,15 +221,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnPrintAll) {
     btnPrintAll.addEventListener("click", handlePrintAllClick);
-  }
-
-  // Ha valaha visszarakod a "Mind" gombot / checkboxokat
-  if (btnSelectAllTypes) {
-    btnSelectAllTypes.addEventListener("click", () => {
-      const pivotCb = document.getElementById("type-pivot");
-      const inverseCb = document.getElementById("type-inverse");
-      if (pivotCb) pivotCb.checked = true;
-      if (inverseCb) inverseCb.checked = true;
-    });
   }
 });
