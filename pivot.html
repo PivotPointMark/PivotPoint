@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pivotálás – Pivot Point</title>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo logo-link" aria-label="Vissza a főoldalra">
+        <div class="logo-badge">P</div>
+        <div>Pivot Point</div>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="section-card">
+        <h1 class="section-title">Pivotálás (Bázistranszformáció)</h1>
+        
+        <p class="section-lead">
+          Gyakorold a Gauss-elimináció lépéseit! Adj meg egy mátrixot, válassz pivot elemet, 
+          és a rendszer elvégzi a számolást lépésről lépésre.
+        </p>
+        <p style="margin-bottom: 2rem; color: #6b5241;">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac scelerisque lectus. 
+          Vivamus quis erat nec nisi vehicula interdum. A Gauss-Jordan elimináció során célunk, 
+          hogy a pivot elemek segítségével nullázzuk az oszlopok többi elemét.
+        </p>
+
+        <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
+
+        <div id="pivot-app-container" class="app-container">
+          
+          <div class="control-panel">
+            <div class="field-group field-group-inline">
+              <label for="matrix-size" class="field-label">Mátrix mérete ($n \times n$)</label>
+              <input type="number" id="matrix-size" value="3" min="2" max="5" class="input-sm" />
+            </div>
+            <button id="btn-create-grid" class="btn-main btn-primary">
+              Mátrix keret létrehozása
+            </button>
+          </div>
+
+          <div id="matrix-input-wrapper" class="matrix-input-wrapper hidden">
+            <p class="instruction-text">Töltsd ki a mátrix elemeit (az üres mező 0-nak számít):</p>
+            
+            <div id="matrix-grid" class="matrix-grid"></div>
+            
+            <div class="action-buttons">
+              <button id="btn-show-matrix" class="btn-main btn-secondary">
+                Mátrix megjelenítése
+              </button>
+            </div>
+          </div>
+
+          <div id="matrix-display-area" class="matrix-display-area hidden">
+            <h3 id="step-title">1. lépés: Válassz pivot elemet!</h3>
+            
+            <div id="singular-warning" class="error-banner hidden">
+              ⚠️ <strong>Figyelem:</strong> A mátrix determinánsa <strong>0</strong>. 
+              Ebből nem lehet egységmátrixot előállítani (a folyamat el fog akadni)!
+            </div>
+
+            <div id="latex-output" class="math-display"></div>
+
+            <div id="step-controls" class="step-controls hidden" style="margin-top: 1.5rem;">
+              <p id="selected-pivot-info" style="margin-bottom: 1rem; font-weight: bold; color: #7b4a2d;"></p>
+              <button id="btn-perform-step" class="btn-main btn-primary">
+                Kiválasztott lépés végrehajtása
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="tasks.js"></script> <script src="pivot.js"></script> </body>
+</html>
