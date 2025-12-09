@@ -645,6 +645,11 @@ body.solutions-visible .zh-solution {
   display: block;
 }
 
+/* MathJax display képletek balra igazítása a megoldásblokkban */
+.zh-solution mjx-container[jax="SVG"][display="true"] {
+  text-align: left !important;
+}
+
 /* =========================
    FOOTER
 ========================= */
