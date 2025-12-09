@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mátrix Létrehozás – Pivot Point</title>
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo logo-link" aria-label="Vissza a főoldalra">
+        <div class="logo-badge">P</div>
+        <div>Pivot Point</div>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="section-card">
+        <h1 class="section-title">Mátrix létrehozás ($n \times n$)</h1>
+        
+        <p class="section-lead">
+          Ez az eszköz segít "szép" mátrixokat generálni vizsgákhoz vagy gyakorláshoz. 
+          Indulj ki egy felső háromszög mátrixból (aminek a determinánsa 1), majd az 
+          elemi átalakításokkal "keverd össze", hogy ne legyen nyilvánvaló a megoldás.
+        </p>
+        <p style="margin-bottom: 2rem; color: #6b5241;">
+          <strong>Tipp:</strong> Használd a "Teljes generálás" gombot egy jó kiinduló alaphoz, 
+          majd a lenti kártyákkal hajts végre sor- és oszlopműveleteket.
+        </p>
+
+        <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
+
+        <div id="create-app-container" class="app-container">
+          
+          <div class="control-panel">
+            <div class="field-group field-group-inline">
+              <label for="matrix-size" class="field-label">Mátrix mérete</label>
+              <input type="number" id="matrix-size" value="3" min="2" max="5" class="input-sm" />
+            </div>
+            <button id="btn-create-grid" class="btn-main btn-primary">
+              Mátrix keret létrehozása
+            </button>
+          </div>
+
+          <div id="matrix-input-wrapper" class="matrix-input-wrapper hidden">
+            
+            <div class="toolbar" style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:1.5rem;">
+              <button id="btn-lower-zero" class="btn-main btn-secondary" style="font-size:0.85rem; padding: 0.6rem;">
+                Alsó 3szög = 0
+              </button>
+              <button id="btn-diag-one" class="btn-main btn-secondary" style="font-size:0.85rem; padding: 0.6rem;">
+                Főátló = 1
+              </button>
+              <button id="btn-upper-rand" class="btn-main btn-secondary" style="font-size:0.85rem; padding: 0.6rem;">
+                Felső 3szög = Random
+              </button>
+              <button id="btn-fill-all" class="btn-main btn-primary" style="font-size:0.85rem; padding: 0.6rem; border: 1px solid var(--color-primary);">
+                ★ Teljes generálás (Tanári)
+              </button>
+            </div>
+
+            <p class="instruction-text">Szerkeszd a mátrixot:</p>
+            
+            <div id="matrix-grid" class="matrix-grid"></div>
+
+            <hr style="border:0; border-top:1px solid #e0d0c0; margin: 2rem 0 1rem 0; width: 100%;">
+            
+            <h4 style="color:#7b4a2d; margin-bottom:0.5rem;">Elemi átalakítások (Keverés)</h4>
+            <p class="field-hint" style="margin-bottom:1rem;">Kattints arra a műveletre, amit el szeretnél végezni!</p>
+
+            <div class="ops-grid">
+              
+              <div class="op-card" id="op-row-swap">
+                <div class="op-title">Sorcsere ($R_i \leftrightarrow R_j$)</div>
+                <div class="op-inputs">
+                  <input type="number" class="op-input" id="rs-1" placeholder="i" min="1">
+                  <span>↔</span>
+                  <input type="number" class="op-input" id="rs-2" placeholder="j" min="1">
+                </div>
+                <button class="btn-op-exec" onclick="executeRowSwap()">Végrehajtás</button>
+              </div>
+
+              <div class="op-card" id="op-col-swap">
+                <div class="op-title">Oszlopcsere ($C_i \leftrightarrow C_j$)</div>
+                <div class="op-inputs">
+                  <input type="number" class="op-input" id="cs-1" placeholder="i" min="1">
+                  <span>↔</span>
+                  <input type="number" class="op-input" id="cs-2" placeholder="j" min="1">
+                </div>
+                <button class="btn-op-exec" onclick="executeColSwap()">Végrehajtás</button>
+              </div>
+
+              <div class="op-card" id="op-row-calc">
+                <div class="op-title">Sorművelet ($R_i \leftarrow R_i + k \cdot R_j$)</div>
+                <div class="op-inputs-complex">
+                  <div>
+                    <label>Hova ($R_i$):</label>
+                    <input type="number" class="op-input" id="rc-target" placeholder="i">
+                  </div>
+                  <div>
+                    <label>Mit ($R_j$):</label>
+                    <input type="number" class="op-input" id="rc-source" placeholder="j">
+                  </div>
+                  <div>
+                    <label>Szorzó ($k$):</label>
+                    <input type="number" class="op-input" id="rc-mult" placeholder="k">
+                  </div>
+                </div>
+                <button class="btn-op-exec" onclick="executeRowCalc()">Végrehajtás</button>
+              </div>
+
+              <div class="op-card" id="op-col-calc">
+                <div class="op-title">Oszlopművelet ($C_i \leftarrow C_i + k \cdot C_j$)</div>
+                <div class="op-inputs-complex">
+                  <div>
+                    <label>Hova ($C_i$):</label>
+                    <input type="number" class="op-input" id="cc-target" placeholder="i">
+                  </div>
+                  <div>
+                    <label>Mit ($C_j$):</label>
+                    <input type="number" class="op-input" id="cc-source" placeholder="j">
+                  </div>
+                  <div>
+                    <label>Szorzó ($k$):</label>
+                    <input type="number" class="op-input" id="cc-mult" placeholder="k">
+                  </div>
+                </div>
+                <button class="btn-op-exec" onclick="executeColCalc()">Végrehajtás</button>
+              </div>
+
+            </div>
+            
+            <hr style="border:0; border-top:1px solid #e0d0c0; margin: 2rem 0;">
+
+            <div class="action-buttons">
+              <button id="btn-show-matrix" class="btn-main btn-secondary">
+                Mátrix megjelenítése LaTeX-ben
+              </button>
+            </div>
+          </div>
+
+          <div id="matrix-display-area" class="matrix-display-area hidden">
+            <h3>A létrehozott mátrix:</h3>
+            <div id="latex-output" class="math-display"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="create_matrix.js"></script>
+</body>
+</html>

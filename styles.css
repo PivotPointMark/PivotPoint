@@ -22,6 +22,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* EZ A SOR JAVÍTJA A HIBÁT: */
+  scroll-padding-top: 90px; 
 }
 
 body {
@@ -1125,4 +1127,136 @@ input[type="number"] {
 
 .error-banner strong {
   font-weight: 700;
+}
+
+/* =========================
+   INVERZ MÁTRIX STÍLUSOK
+========================= */
+
+/* Konténer a két mátrixnak */
+.augmented-matrix-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0; /* Nincs rés, a szegély választja el */
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  padding: 15px 25px;
+  margin: 1rem auto;
+  display: inline-flex;
+}
+
+/* A bal oldali mátrix (A) */
+.matrix-left {
+  padding-right: 15px;
+  border-right: 2px solid #7b4a2d; /* A választóvonal */
+}
+
+/* A jobb oldali mátrix (I) */
+.matrix-right {
+  padding-left: 15px;
+}
+
+/* A jobb oldali cellák kicsit halványabbak, mert azok nem kattinthatók */
+.matrix-right .interactive-cell {
+  background-color: #f9f9f9;
+  cursor: default; /* Nem kéz kurzor */
+  color: #666;
+}
+
+.matrix-right .interactive-cell:hover {
+  transform: none;
+  background-color: #f9f9f9;
+}
+
+/* =========================
+   MŰVELETI PANEL (CREATE MATRIX)
+========================= */
+
+.ops-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.op-card {
+  background: #fff;
+  border: 1px solid rgba(123, 74, 45, 0.15);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Aktív állapot: Kiemelve */
+.op-card.active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(123, 74, 45, 0.2);
+  transform: translateY(-2px);
+  z-index: 2;
+  opacity: 1 !important;
+}
+
+/* Inaktív állapot: Elhalványítva */
+.ops-grid.has-active .op-card:not(.active) {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+  transform: scale(0.98);
+}
+
+.op-title {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+.op-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.op-inputs-complex {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.op-inputs-complex div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.op-input {
+  width: 50px;
+  padding: 4px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.btn-op-exec {
+  width: 100%;
+  padding: 0.5rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: none; /* Alapból rejtve, csak aktívnál látszik */
+}
+
+.op-card.active .btn-op-exec {
+  display: block;
+  animation: fadeIn 0.3s;
 }
