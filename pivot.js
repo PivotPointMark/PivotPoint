@@ -1,11 +1,12 @@
 // ======================
-// PIVOT.JS – Interaktív Gauss-elimináció + Det ellenőrzés
+// PIVOT.JS – "History" móddal + Véletlen kitöltés
 // ======================
 
 document.addEventListener("DOMContentLoaded", () => {
     const sizeInput = document.getElementById("matrix-size");
     const btnCreate = document.getElementById("btn-create-grid");
     const btnShow = document.getElementById("btn-show-matrix");
+    const btnFillRandom = document.getElementById("btn-fill-random"); // ÚJ GOMB
     
     const inputWrapper = document.getElementById("matrix-input-wrapper");
     const gridContainer = document.getElementById("matrix-grid");
@@ -17,13 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const pivotInfo = document.getElementById("selected-pivot-info");
     const btnStep = document.getElementById("btn-perform-step");
     const stepTitle = document.getElementById("step-title");
-
-    const singularWarning = document.getElementById("singular-warning"); // ÚJ ELEM
+    const singularWarning = document.getElementById("singular-warning");
   
-    // ÁLLAPOT KEZELÉS
+    // ÁLLAPOT
     let currentMatrixData = [];
     let matrixSize = 0;
-    let selectedPivot = null;
+    let selectedPivot = null; 
     let stepCount = 0;
 
     // 1. Keret létrehozása
@@ -55,10 +55,21 @@ document.addEventListener("DOMContentLoaded", () => {
       inputWrapper.classList.remove("hidden");
       displayArea.classList.add("hidden");
       stepControls.classList.add("hidden");
-      singularWarning.classList.add("hidden"); // Reset
+      singularWarning.classList.add("hidden");
+      latexOutput.innerHTML = ""; 
+    });
+
+    // --- ÚJ FUNKCIÓ: VÉLETLEN KITÖLTÉS ---
+    btnFillRandom.addEventListener("click", () => {
+        const inputs = gridContainer.querySelectorAll("input");
+        inputs.forEach(input => {
+            // Véletlen egész szám -10 és 10 között
+            const randomVal = Math.floor(Math.random() * 21) - 10;
+            input.value = randomVal;
+        });
     });
   
-    // 2. Kezdő mátrix beolvasása és ELLENŐRZÉS
+    // 2. Kezdő mátrix beolvasása
     btnShow.addEventListener("click", () => {
       const inputs = gridContainer.querySelectorAll("input");
       currentMatrixData = [];
@@ -74,65 +85,96 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
   
-      stepCount = 1;
-      
-      // --- ÚJ RÉSZ: DETERMINÁNS ELLENŐRZÉS ---
       const det = calculateDeterminant(currentMatrixData);
-      
-      if (Math.abs(det) < 1e-9) {
-          singularWarning.classList.remove("hidden"); // Üzenet megjelenítése
-      } else {
-          singularWarning.classList.add("hidden"); // Üzenet elrejtése
-      }
-      // ----------------------------------------
+      if (Math.abs(det) < 1e-9) singularWarning.classList.remove("hidden");
+      else singularWarning.classList.add("hidden");
 
-      updateDisplay();
+      stepCount = 0;
+      latexOutput.innerHTML = ""; 
+      displayArea.classList.remove("hidden");
+      stepTitle.style.display = "none"; 
+
+      appendNewStep(currentMatrixData, stepCount);
     });
 
     // 3. LÉPÉS VÉGREHAJTÁSA
     btnStep.addEventListener("click", () => {
         if (!selectedPivot) return;
+
+        freezeLastTable();
         performGaussStep(selectedPivot.row, selectedPivot.col);
+
         selectedPivot = null;
+        stepControls.classList.add("hidden"); 
         stepCount++;
-        updateDisplay();
+
+        appendNewStep(currentMatrixData, stepCount);
     });
 
-    function updateDisplay() {
-        stepTitle.textContent = `${stepCount}. lépés: Válassz pivot elemet!`;
-        stepControls.classList.add("hidden");
-        displayArea.classList.remove("hidden");
-        renderInteractiveMatrix(currentMatrixData, matrixSize);
-    }
+    function appendNewStep(matrixData, count) {
+        if (count > 0) {
+            const arrowDiv = document.createElement("div");
+            arrowDiv.style.textAlign = "center";
+            arrowDiv.style.fontSize = "1.5rem";
+            arrowDiv.style.color = "#b77b4f";
+            arrowDiv.style.margin = "0.5rem 0";
+            arrowDiv.innerHTML = "↓";
+            latexOutput.appendChild(arrowDiv);
+        }
 
-    function renderInteractiveMatrix(matrix, n) {
-        latexOutput.innerHTML = ""; 
+        const stepWrapper = document.createElement("div");
+        stepWrapper.className = "step-block"; 
+        stepWrapper.style.textAlign = "center";
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "interactive-matrix-container";
-
+        const label = document.createElement("h4");
+        label.style.color = "#7b4a2d";
+        label.style.marginBottom = "0.5rem";
+        if (count === 0) label.textContent = "Kiinduló mátrix (Válassz pivotot!)";
+        else label.textContent = `${count}. lépés eredménye (Folytasd a választást!)`;
+        
         const table = document.createElement("table");
-        table.className = "interactive-matrix";
+        table.className = "interactive-matrix active-matrix"; 
 
-        for (let r = 0; r < n; r++) {
+        for (let r = 0; r < matrixSize; r++) {
             const tr = document.createElement("tr");
-            for (let c = 0; c < n; c++) {
+            for (let c = 0; c < matrixSize; c++) {
                 const td = document.createElement("td");
                 td.className = "interactive-cell";
                 
-                let val = matrix[r][c];
-                let displayVal = Math.abs(Math.round(val) - val) < 1e-9 
-                    ? Math.round(val) 
-                    : val.toFixed(2);
-
+                let val = matrixData[r][c];
+                // Ha egész szám, ne legyen tizedesjegy, egyébként max 2
+                let displayVal = Math.abs(Math.round(val) - val) < 1e-9 ? Math.round(val) : val.toFixed(2);
                 td.textContent = displayVal;
-                td.onclick = () => handleCellClick(r, c, val, td, table);
+
+                td.onclick = () => {
+                    if (!table.classList.contains("active-matrix")) return;
+                    handleCellClick(r, c, val, td, table);
+                };
+
                 tr.appendChild(td);
             }
             table.appendChild(tr);
         }
-        wrapper.appendChild(table);
-        latexOutput.appendChild(wrapper);
+
+        stepWrapper.appendChild(label);
+        stepWrapper.appendChild(table);
+        latexOutput.appendChild(stepWrapper);
+
+        stepWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function freezeLastTable() {
+        const activeTable = latexOutput.querySelector(".active-matrix");
+        if (activeTable) {
+            activeTable.classList.remove("active-matrix");
+            const cells = activeTable.querySelectorAll("td");
+            cells.forEach(cell => {
+                cell.style.cursor = "default"; 
+                if (!cell.classList.contains("selected")) {
+                    cell.style.opacity = "0.6"; 
+                }
+            });
+        }
     }
 
     function handleCellClick(r, c, val, cellElement, tableElement) {
@@ -152,47 +194,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function performGaussStep(pRow, pCol) {
         const n = matrixSize;
-        const pivotVal = currentMatrixData[pRow][pCol];
+        let newMatrix = currentMatrixData.map(row => row.slice());
+        
+        const pivotVal = newMatrix[pRow][pCol];
 
+        // 1. Osztás
         for (let j = 0; j < n; j++) {
-            currentMatrixData[pRow][j] = currentMatrixData[pRow][j] / pivotVal;
+            newMatrix[pRow][j] = newMatrix[pRow][j] / pivotVal;
         }
-        currentMatrixData[pRow][pCol] = 1;
+        newMatrix[pRow][pCol] = 1;
 
+        // 2. Kivonás
         for (let i = 0; i < n; i++) {
             if (i !== pRow) {
-                const factor = currentMatrixData[i][pCol];
+                const factor = newMatrix[i][pCol];
                 if (Math.abs(factor) < 1e-9) continue;
 
                 for (let j = 0; j < n; j++) {
-                    currentMatrixData[i][j] = currentMatrixData[i][j] - (factor * currentMatrixData[pRow][j]);
+                    newMatrix[i][j] = newMatrix[i][j] - (factor * newMatrix[pRow][j]);
                 }
-                currentMatrixData[i][pCol] = 0;
+                newMatrix[i][pCol] = 0;
             }
         }
+        
+        currentMatrixData = newMatrix;
     }
 
-    // --- ÚJ SEGÉDFÜGGVÉNY: Rekurzív Determináns Számító ---
     function calculateDeterminant(m) {
-        // Alapeset: 1x1-es mátrix (bár itt min 2x2 van, de biztosra megyünk)
         if (m.length === 1) return m[0][0];
-        
-        // Alapeset: 2x2-es mátrix (ad-bc)
-        if (m.length === 2) {
-            return m[0][0] * m[1][1] - m[0][1] * m[1][0];
-        }
-
-        // Rekurzió (Kifejtés az első sor szerint)
+        if (m.length === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
         let det = 0;
         for (let c = 0; c < m.length; c++) {
-            // Előjel: (-1)^c
             const sign = (c % 2 === 0) ? 1 : -1;
-            
-            // Minor mátrix képzése (az első sor és a c. oszlop elhagyása)
-            const subMatrix = m.slice(1).map(row => 
-                row.filter((_, colIndex) => colIndex !== c)
-            );
-            
+            const subMatrix = m.slice(1).map(row => row.filter((_, colIndex) => colIndex !== c));
             det += sign * m[0][c] * calculateDeterminant(subMatrix);
         }
         return det;
