@@ -5,14 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pivot Point – Lineáris Algebra ZH generátor</title>
 
-  <!-- jsPDF CDN a PDF generáláshoz -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- MathJax konfiguráció (LaTeX render) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+
+  <!-- MathJax: SVG output (nyomtatásban is szép) -->
+  <script
+    id="MathJax-script"
+    async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+  ></script>
 
   <link rel="stylesheet" href="styles.css" />
   <script src="main.js" defer></script>
 </head>
 <body>
-  <header>
+  <header class="no-print">
     <div class="nav-container">
       <div class="logo">
         <div class="logo-badge">P</div>
@@ -48,7 +63,7 @@
 
   <main>
     <!-- HERO / KEZDŐLAP -->
-    <section class="hero" aria-labelledby="hero-title">
+    <section class="hero no-print" aria-labelledby="hero-title">
       <div class="hero-text">
         <div class="hero-kicker">Lineáris Algebra • ZH generátor</div>
 
@@ -58,15 +73,14 @@
         </h1>
 
         <p class="hero-subtitle">
-          Állítsd be a feladattípusokat, a mátrixméretet és a nehézséget,
-          és a Pivot Point legenerálja neked a vizsgalapot
-          <strong>és</strong> a megoldókulcsot. Tanároknak ZH-khoz,
-          hallgatóknak gyakorláshoz.
+          A jelenlegi demó egyetlen feladatot generál:
+          <strong>egy 3×3-as mátrix inverzét</strong>, szépen kiszámolható
+          egész inverz-mátrixszal.
         </p>
 
         <div class="hero-actions">
           <a href="#zh-generator" class="btn-main btn-primary">
-            ZH generálása most
+            Feladat generálása
             <span>➜</span>
           </a>
           <a href="#celunk" class="btn-main btn-secondary">
@@ -75,288 +89,166 @@
         </div>
 
         <div class="hero-meta">
-          <span><span class="dot"></span> Feladatsor + megoldókulcs PDF-ben</span>
-          <span><span class="dot"></span> Lineáris egyenletrendszerek, determináns, inverz, rang</span>
+          <span><span class="dot"></span> LaTeX-stílusú mátrixok (MathJax)</span>
+          <span><span class="dot"></span> Nyomtatható / PDF-be menthető ZH</span>
         </div>
       </div>
 
-      <!-- jobb oldali infókártya / preview -->
       <aside class="hero-card" aria-label="ZH generátor rövid leírás">
         <div class="hero-card-header">
           <div>
-            <div class="hero-card-title">Gyors áttekintés</div>
-            <small>Mit fog tudni a Pivot Point?</small>
+            <div class="hero-card-title">Aktuális demó</div>
+            <small>Mátrixinverz feladat</small>
           </div>
-          <div class="hero-badge">Hallgatóknak &amp; oktatóknak</div>
+          <div class="hero-badge">3×3 inverz</div>
         </div>
 
         <div class="hero-card-list">
           <div class="hero-card-item">
             <div class="hero-card-bullet">1</div>
             <div>
-              Válaszd ki, hány <strong>lineáris egyenletrendszer</strong>,
-              determináns-, inverz- és rangfeladat kerüljön a ZH-ra.
+              Egy véletlen <strong>3×3-as mátrixot</strong> generálunk,
+              amelynek determinánsa ±1.
             </div>
           </div>
           <div class="hero-card-item">
             <div class="hero-card-bullet">2</div>
             <div>
-              A rendszer pivotálásos <strong>Gauss-eliminációt</strong> használ,
-              és a megoldókulcsban lépésről lépésre mutatja a megoldást.
+              A feladat: „Határozza meg az alábbi mátrix inverzét!”
             </div>
           </div>
           <div class="hero-card-item">
             <div class="hero-card-bullet">3</div>
             <div>
-              Egy kattintással letölthető <strong>ZH-feladatlap PDF</strong>,
-              illetve külön a feladatok és a megoldások is.
+              A megoldókulcsban a <strong>valódi inverz-mátrix</strong> látható,
+              MathJax-szal szedve.
             </div>
           </div>
         </div>
 
         <div class="hero-card-footer">
-          <span>Webes felület, telepítés nélkül.</span>
-          <span>Fejlesztés alatt – szakdolgozati projekt.</span>
+          <span>Alap demó – később jönnek a többi feladattípusok.</span>
+          <span>Nyomtatáshoz használd a „Feladatlap PDF” gombot.</span>
         </div>
       </aside>
     </section>
 
     <!-- CÉLUNK -->
-    <section id="celunk" class="section">
+    <section id="celunk" class="section no-print">
       <div class="section-card section-card-light">
         <h2 class="section-title">Mi a weboldal célja?</h2>
         <p class="section-lead">
           A <strong>Pivot Point</strong> egy oktatást segítő eszköz, amely
           lineáris algebra ZH-k és gyakorló feladatsorok gyors
-          generálásában segít. Egyszerre támogatja az oktatókat a
-          vizsgalapok összeállításában, és a hallgatókat a célzott gyakorlásban.
+          generálásában segít. A mostani demó az inverz-mátrix feladattípusra fókuszál.
         </p>
-
-        <div class="section-grid two-cols">
-          <div class="section-pill">
-            <h3>Oktatóknak</h3>
-            <ul>
-              <li>Automatikusan generált ZH-feladatsorok.</li>
-              <li>Feladattípusonként állítható darabszám és nehézség.</li>
-              <li>Azonnal kész <strong>megoldókulcs PDF</strong>.</li>
-            </ul>
-          </div>
-          <div class="section-pill">
-            <h3>Hallgatóknak</h3>
-            <ul>
-              <li>Gyakorló feladatsorok a vizsga témaköreihez.</li>
-              <li>Fókusz konkrét feladattípusokra (pl. determináns, inverz).</li>
-              <li>Megoldások a számolások ellenőrzéséhez.</li>
-            </ul>
-          </div>
-        </div>
       </div>
     </section>
 
     <!-- MIÉRT LINEÁRIS ALGEBRA? -->
-    <section id="miert" class="section">
+    <section id="miert" class="section no-print">
       <div class="section-card section-card-alt">
         <h2 class="section-title">Minek tanuljak Lineáris Algebrát?</h2>
         <p class="section-lead">
-          A lineáris algebra nem csak egy „kötelező tárgy”, hanem az
-          alkalmazott matematika egyik alapeszköze. Ha értesz a mátrixok
-          világához, rengeteg területen otthonosan fogsz mozogni.
+          A lineáris algebra az adattudomány, optimalizálás, grafika és sok más terület alapnyelve.
         </p>
-
-        <div class="section-grid three-cols">
-          <div class="feature-card">
-            <h3>Adattudomány &amp; gépi tanulás</h3>
-            <p>
-              Vektorok, mátrixok, rang, sajátértékek – ezek állnak a
-              regresszió, a PCA és sok gépi tanulási algoritmus hátterében.
-            </p>
-          </div>
-          <div class="feature-card">
-            <h3>Gazdasági modellek</h3>
-            <p>
-              Termelési, szállítási és optimalizálási feladatok
-              lineáris egyenletrendszerekre és mátrixokra támaszkodnak.
-            </p>
-          </div>
-          <div class="feature-card">
-            <h3>Számítógépes grafika</h3>
-            <p>
-              Képek forgatása, nagyítása, perspektíva – mind-mind
-              mátrixszorzásokkal írhatók le.
-            </p>
-          </div>
-        </div>
       </div>
     </section>
 
     <!-- 5-ÖSRE KÉSZÜLÖK -->
-    <section id="otos" class="section">
+    <section id="otos" class="section no-print">
       <div class="section-card section-card-light">
         <h2 class="section-title">Legyen neked is 5-ös Lineáris Algebrából</h2>
         <p class="section-lead">
-          A jó jegy ritkán szerencse kérdése. A lényeg, hogy
-          <strong>tudatosan</strong> gyakorolj – feladattípusonként és
-          fokozatosan emelve a nehézséget.
+          A rendszerrel célzottan tudsz gyakorolni inverz-mátrix feladatokat is.
         </p>
-
-        <div class="section-grid two-cols tips-grid">
-          <div class="tip-item">
-            <span class="tip-number">1</span>
-            <div>
-              <h3>Értsd a módszereket</h3>
-              <p>
-                Ne csak a képleteket memorizáld. Tudd, mit jelent a
-                pivotálás, rang, inverz – és miért működik a Gauss-elimináció.
-              </p>
-            </div>
-          </div>
-
-          <div class="tip-item">
-            <span class="tip-number">2</span>
-            <div>
-              <h3>Gyakorolj feladattípusonként</h3>
-              <p>
-                Állítsd be a Pivot Pointban, hogy csak determinánsokat
-                vagy csak lineáris egyenletrendszereket szeretnél – így
-                célzottan tudsz edzeni.
-              </p>
-            </div>
-          </div>
-
-          <div class="tip-item">
-            <span class="tip-number">3</span>
-            <div>
-              <h3>Emeld a nehézséget</h3>
-              <p>
-                Kezdd kisebb mátrixokkal és könnyű példákkal, majd lépj
-                tovább nagyobb tartományokra és bonyolultabb feladatokra.
-              </p>
-            </div>
-          </div>
-
-          <div class="tip-item">
-            <span class="tip-number">4</span>
-            <div>
-              <h3>Ellenőrizd magad</h3>
-              <p>
-                Oldd meg kézzel a feladatot, majd hasonlítsd össze a
-                megoldókulccsal. Ha eltérés van, próbáld megkeresni,
-                hol csúszott be hiba.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
-    <!-- ZH GENERÁTOR -->
+    <!-- ZH GENERÁTOR – FELADAT + MEGOLDÁS + 2 PDF GOMB -->
     <section id="zh-generator" class="section">
       <div class="section-card section-zh-card">
         <div class="section-header-row">
           <div>
-            <h2 class="section-title">ZH feladatlap generátor</h2>
+            <h2 class="section-title">ZH feladat (3×3 mátrixinverz)</h2>
             <p class="section-lead">
-              Válaszd ki a feladattípusokat és a paramétereket, majd
-              generálj egy teljes ZH-t a megoldókulccsal együtt. Az
-              eredményeket egy kattintással PDF-ként is letöltheted.
+              A demó egyetlen feladatot generál: egy 3×3-as mátrixot,
+              amelynek inverze létezik és egész számokból áll.
             </p>
           </div>
-          <div class="badge-soft">Alfa verzió – demo generálás</div>
+          <div class="badge-soft no-print">Alfa verzió</div>
         </div>
 
         <div class="zh-layout">
-          <!-- BAL: BEÁLLÍTÁSOK -->
-          <form id="zh-form" class="zh-form" onsubmit="return false;">
-            <div class="field-row">
-              <div class="field-group">
-                <label for="matrix-size" class="field-label">Mátrixméret</label>
-                <select id="matrix-size">
-                  <option value="2">2 × 2</option>
-                  <option value="3" selected>3 × 3</option>
-                  <option value="4">4 × 4</option>
-                </select>
-              </div>
-
-              <div class="field-group">
-                <label for="difficulty" class="field-label">Nehézség</label>
-                <select id="difficulty">
-                  <option value="easy">Könnyű</option>
-                  <option value="medium" selected>Közepes</option>
-                  <option value="hard">Nehéz</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="field-row field-row-multi">
-              <div class="field-group">
-                <label for="num-linear" class="field-label">
-                  Lineáris egyenletrendszer
-                </label>
-                <input id="num-linear" type="number" min="0" max="10" value="2" />
-              </div>
-
-              <div class="field-group">
-                <label for="num-det" class="field-label">
-                  Determináns
-                </label>
-                <input id="num-det" type="number" min="0" max="10" value="2" />
-              </div>
-
-              <div class="field-group">
-                <label for="num-inv" class="field-label">
-                  Mátrixinverz
-                </label>
-                <input id="num-inv" type="number" min="0" max="10" value="1" />
-              </div>
-
-              <div class="field-group">
-                <label for="num-rank" class="field-label">
-                  Rang
-                </label>
-                <input id="num-rank" type="number" min="0" max="10" value="1" />
-              </div>
-            </div>
+          <!-- BAL: GOMBOK (csak weben látszik) -->
+          <form id="zh-form" class="zh-form no-print" onsubmit="return false;">
+            <p class="field-label">
+              Kattints a gombra egy új 3×3-as mátrix-inverz feladat generálásához.
+            </p>
 
             <div class="field-row buttons-row">
               <button type="button" id="btn-generate-zh" class="btn-main btn-primary">
-                Feladatsor generálása
+                Feladat generálása
               </button>
-              <button type="button" id="btn-download-zh" class="btn-main btn-secondary" disabled>
-                ZH PDF letöltése
+              <button
+                type="button"
+                id="btn-show-solutions"
+                class="btn-main btn-secondary"
+                disabled
+              >
+                Megoldókulcs megjelenítése
               </button>
-              <button type="button" id="btn-download-solutions" class="btn-main btn-secondary" disabled>
-                Megoldókulcs PDF letöltése
+              <button
+                type="button"
+                id="btn-print-tasks"
+                class="btn-main btn-secondary"
+                disabled
+              >
+                Feladatlap PDF
+              </button>
+              <button
+                type="button"
+                id="btn-print-all"
+                class="btn-main btn-secondary"
+                disabled
+              >
+                Feladat + megoldás PDF
               </button>
             </div>
 
             <p class="note-small">
-              A matematikai motor jelenleg demo jellegű. Később
-              pivotálásos Gauss-eliminációval fogja a részletes
-              megoldásokat kiszámítani.
+              <strong>Feladat generálása</strong>: új 3×3-as mátrix inverz feladat.<br />
+              <strong>Megoldókulcs megjelenítése</strong>: csak a weblapon kapcsolja be/ki a megoldást.<br />
+              <strong>Feladatlap PDF</strong>: csak a feladatok.<br />
+              <strong>Feladat + megoldás PDF</strong>: feladatok és megoldókulcs egyben.
             </p>
           </form>
 
           <!-- JOBB: KIMENET -->
           <div class="zh-output">
             <div class="zh-output-column">
-              <h3>ZH feladatsor (előnézet)</h3>
-              <pre id="zhTasksOutput" class="zh-output-pre">
-Még nem készült feladatsor. Kattints a „Feladatsor generálása” gombra.</pre>
+              <h3>ZH feladat</h3>
+              <div id="zhTasksOutput" class="zh-output-div">
+                <p>Még nem készült feladat. Kattints a „Feladat generálása” gombra.</p>
+              </div>
             </div>
 
-            <div class="zh-output-column">
-              <h3>Megoldókulcs (előnézet)</h3>
-              <pre id="zhSolutionsOutput" class="zh-output-pre">
-Még nem készült megoldókulcs.</pre>
+            <div class="zh-output-column" id="solutionsColumn">
+              <h3>Megoldókulcs</h3>
+              <div id="zhSolutionsOutput" class="zh-output-div">
+                <p>Még nem készült megoldókulcs.</p>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
+
   </main>
 
   <!-- FOOTER -->
-  <footer class="site-footer">
+  <footer class="site-footer no-print">
     <div class="footer-inner">
       <div class="footer-main">
         <p class="footer-brand">Pivot Point</p>

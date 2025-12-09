@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>3x3 mátrix PDF-hez</title>
+
+  <!-- MathJax beállítás -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+
+  <!-- MathJax betöltése -->
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+
+    .actions {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Nyomtatáshoz: a gomb ne látszódjon a PDF-ben */
+    @media print {
+      .actions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>3×3 mátrix példa</h1>
+
+  <div class="actions">
+    <button onclick="window.print()">Letöltés PDF-be</button>
+  </div>
+
+  <p>A következő egy 3×3-as mátrix:</p>
+
+  <p>
+    $$
+    A = \begin{pmatrix}
+      1 & 2 & 3 \\\\
+      4 & 5 & 6 \\\\
+      7 & 8 & 9
+    \end{pmatrix}
+    $$
+  </p>
+</body>
+</html>

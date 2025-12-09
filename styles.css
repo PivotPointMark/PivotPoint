@@ -330,7 +330,7 @@ main {
   background: var(--color-accent);
 }
 
-/* HERO CARD (jobb oldal) */
+/* HERO CARD */
 
 .hero-card {
   background: linear-gradient(
@@ -404,8 +404,6 @@ main {
   color: #8a715e;
 }
 
-/* RESPONSIVE HERO */
-
 @media (max-width: 900px) {
   .hero {
     grid-template-columns: minmax(0, 1fr);
@@ -413,21 +411,11 @@ main {
   }
 
   .hero-card {
-    order: -1; /* mobilon felülre kerül */
+    order: -1;
   }
 }
 
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 1.8rem;
-  }
-
-  .hero-subtitle {
-    font-size: 0.95rem;
-  }
-}
-
-/* GENERIC SECTIONS */
+/* SECTIONS */
 
 .section {
   margin-top: 3rem;
@@ -485,7 +473,7 @@ main {
   }
 }
 
-/* CELUNK / MIERT KÁRTYÁK */
+/* KÁRTYÁK, TIPPEK – változatlan, kihagyom a részletes kommentet */
 
 .section-pill {
   padding: 1.25rem 1.1rem;
@@ -522,8 +510,6 @@ main {
 .feature-card p {
   font-size: 0.94rem;
 }
-
-/* 5-ÖS GRID */
 
 .tips-grid {
   margin-top: 0.25rem;
@@ -673,21 +659,24 @@ select:focus {
   color: var(--color-primary);
 }
 
-.zh-output-pre {
+.zh-output-div {
   background: rgba(255, 255, 255, 0.95);
   border-radius: var(--radius-lg);
   padding: 0.85rem 0.9rem;
   border: 1px solid rgba(123, 74, 45, 0.2);
-  font-size: 0.84rem;
-  font-family: "Courier New", monospace;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  max-height: 280px;
-  overflow: auto;
+  font-size: 0.95rem;
 }
 
+.zh-output-div p {
+  margin: 0.25rem 0;
+}
 
-/* ZH RESPONSIVE */
+.zh-task + .zh-task,
+.zh-solution + .zh-solution {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(123, 74, 45, 0.2);
+}
 
 @media (max-width: 900px) {
   .zh-layout {
@@ -704,7 +693,7 @@ select:focus {
   }
 }
 
-/* ===== FOOTER ===== */
+/* FOOTER */
 
 .site-footer {
   margin-top: 3rem;
@@ -804,12 +793,103 @@ select:focus {
   opacity: 0.9;
 }
 
-@media (max-width: 600px) {
-  .footer-inner {
-    align-items: flex-start;
+/* ===== PRINT BEÁLLÍTÁSOK ===== */
+
+@media print {
+  body {
+    background: #ffffff;
   }
 
-  .footer-main {
+  .no-print {
+    display: none !important;
+  }
+
+  header,
+  .site-footer {
+    display: none !important;
+  }
+
+  main {
     max-width: 100%;
+    padding: 0;
+  }
+
+  .section-zh-card {
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+  }
+
+  #zh-generator {
+    margin-top: 0;
+  }
+}
+
+
+/* Megoldókulcs: alapból rejtve, csak kérésre látszik */
+#solutionsColumn {
+  display: none;
+}
+
+/* Ha a body-n rajta van a solutions-visible osztály, akkor mutatjuk */
+body.solutions-visible #solutionsColumn {
+  display: block;
+}
+
+/* Amikor csak feladatok vannak, a rács legyen 1 oszlopos */
+body:not(.solutions-visible) .zh-output {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Nyomtatásnál is érvényesek legyenek ezek a szabályok */
+@media print {
+  body.solutions-visible #solutionsColumn {
+    display: block !important;
+  }
+
+  body:not(.solutions-visible) #solutionsColumn {
+    display: none !important;
+  }
+
+  body:not(.solutions-visible) .zh-output {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Megoldókulcs oszlop alapból rejtve --- */
+#solutionsColumn {
+  display: none;
+}
+
+/* Weben: ha a body-n rajta van a solutions-visible osztály, akkor látszik */
+body.solutions-visible #solutionsColumn {
+  display: block;
+}
+
+/* Webes elrendezés: ha nincs megoldás, 1 oszlop; ha van, 2 oszlop */
+body.solutions-visible .zh-output {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+body:not(.solutions-visible) .zh-output {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Nyomtatás: két külön „mód” a body-n:
+   - print-mode-tasks: csak feladatok
+   - print-mode-all: feladat + megoldás
+*/
+@media print {
+  body.print-mode-tasks #solutionsColumn {
+    display: none !important;
+  }
+  body.print-mode-all #solutionsColumn {
+    display: block !important;
+  }
+
+  body.print-mode-tasks .zh-output {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.print-mode-all .zh-output {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

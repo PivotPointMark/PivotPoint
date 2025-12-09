@@ -15,144 +15,61 @@ if (navToggle && navLinks) {
 }
 
 // ======================
-// ZH GENERÁTOR LOGIKA
+// ZH GENERÁTOR – csak 3×3 inverz feladat
 // ======================
 
-let lastZhTasksText = "";
-let lastZhSolutionsText = "";
+let hasGeneratedZh = false;
 
-// Segédfüggvény: véletlen egész [min, max] között
+// Véletlen egész [min, max]
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function intRangeForDifficulty(diff) {
-  switch (diff) {
-    case "easy":
-      return 3;
-    case "hard":
-      return 9;
-    case "medium":
-    default:
-      return 5;
-  }
-}
+// 3×3 „szép” egész mátrix: identitásból indulunk, elemi sortetők
+function generateNiceIntMatrix3x3() {
+  let A = [
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+  ];
 
-function generateRandomMatrix(size, difficulty) {
-  const range = intRangeForDifficulty(difficulty);
-  const matrix = [];
-  for (let i = 0; i < size; i++) {
-    const row = [];
-    for (let j = 0; j < size; j++) {
-      row.push(randInt(-range, range));
-    }
-    matrix.push(row);
-  }
-  return matrix;
-}
+  const steps = randInt(3, 6);
 
-function cloneMatrix(m) {
-  return m.map((row) => row.slice());
-}
+  for (let s = 0; s < steps; s++) {
+    const op = randInt(0, 2);
 
-// Determináns (egyszerű Gauss-eliminációval)
-function determinant(matrix) {
-  const n = matrix.length;
-  const a = cloneMatrix(matrix);
-  let det = 1;
+    if (op === 0) {
+      // Sorhozzáadás: R_i <- R_i + k * R_j
+      const i = randInt(0, 2);
+      let j = randInt(0, 2);
+      while (j === i) j = randInt(0, 2);
+      let k = randInt(1, 3);
+      if (Math.random() < 0.5) k = -k;
 
-  for (let i = 0; i < n; i++) {
-    // pivot keresése
-    let pivotRow = i;
-    for (let r = i + 1; r < n; r++) {
-      if (Math.abs(a[r][i]) > Math.abs(a[pivotRow][i])) {
-        pivotRow = r;
+      for (let c = 0; c < 3; c++) {
+        A[i][c] += k * A[j][c];
       }
-    }
-
-    if (Math.abs(a[pivotRow][i]) < 1e-10) {
-      return 0;
-    }
-
-    if (pivotRow !== i) {
-      const tmp = a[i];
-      a[i] = a[pivotRow];
-      a[pivotRow] = tmp;
-      det *= -1;
-    }
-
-    const pivot = a[i][i];
-    det *= pivot;
-
-    for (let r = i + 1; r < n; r++) {
-      const factor = a[r][i] / pivot;
-      for (let c = i; c < n; c++) {
-        a[r][c] -= factor * a[i][c];
+    } else if (op === 1) {
+      // Sorcsere
+      const i = randInt(0, 2);
+      let j = randInt(0, 2);
+      while (j === i) j = randInt(0, 2);
+      const tmp = A[i];
+      A[i] = A[j];
+      A[j] = tmp;
+    } else {
+      // Sor szorzása -1-gyel
+      const i = randInt(0, 2);
+      for (let c = 0; c < 3; c++) {
+        A[i][c] *= -1;
       }
     }
   }
 
-  return Math.round(det);
+  return A;
 }
 
-function generateInvertibleMatrix(size, difficulty, maxTries = 30) {
-  for (let k = 0; k < maxTries; k++) {
-    const m = generateRandomMatrix(size, difficulty);
-    if (determinant(m) !== 0) {
-      return m;
-    }
-  }
-  // nagyon ritkán: ha nem találtunk nem szingulárist
-  return generateRandomMatrix(size, difficulty);
-}
-
-// Gauss–Jordan megoldó: A x = b
-function solveLinearSystem(A, b) {
-  const n = A.length;
-  const M = A.map((row, i) => row.concat([b[i]]));
-
-  for (let i = 0; i < n; i++) {
-    // pivot keresése
-    let pivotRow = i;
-    for (let r = i + 1; r < n; r++) {
-      if (Math.abs(M[r][i]) > Math.abs(M[pivotRow][i])) {
-        pivotRow = r;
-      }
-    }
-    if (Math.abs(M[pivotRow][i]) < 1e-10) {
-      return null; // nincs egyértelmű megoldás
-    }
-
-    if (pivotRow !== i) {
-      const tmp = M[i];
-      M[i] = M[pivotRow];
-      M[pivotRow] = tmp;
-    }
-
-    // normalizáljuk a pivot sort
-    const pivot = M[i][i];
-    for (let c = i; c <= n; c++) {
-      M[i][c] /= pivot;
-    }
-
-    // nullázzuk a többi sort
-    for (let r = 0; r < n; r++) {
-      if (r === i) continue;
-      const factor = M[r][i];
-      for (let c = i; c <= n; c++) {
-        M[r][c] -= factor * M[i][c];
-      }
-    }
-  }
-
-  const x = new Array(n);
-  for (let i = 0; i < n; i++) {
-    x[i] = M[i][n];
-  }
-  return x;
-}
-
-// Inverz Gauss–Jordan-nel
+// Inverz Gauss–Jordan-eliminációval
 function inverseMatrix(A) {
   const n = A.length;
   const M = A.map((row, i) => {
@@ -162,6 +79,7 @@ function inverseMatrix(A) {
   });
 
   for (let i = 0; i < n; i++) {
+    // Pivot választás
     let pivotRow = i;
     for (let r = i + 1; r < n; r++) {
       if (Math.abs(M[r][i]) > Math.abs(M[pivotRow][i])) {
@@ -169,8 +87,9 @@ function inverseMatrix(A) {
       }
     }
     if (Math.abs(M[pivotRow][i]) < 1e-10) {
-      return null;
+      return null; // szinguláris
     }
+
     if (pivotRow !== i) {
       const tmp = M[i];
       M[i] = M[pivotRow];
@@ -198,354 +117,168 @@ function inverseMatrix(A) {
   return inv;
 }
 
-// Rang – sorredukált alak nemnulla sorainak száma
-function rankOfMatrix(A) {
-  const m = cloneMatrix(A);
-  const n = m.length;
-  let rank = 0;
-  let row = 0;
-
-  for (let col = 0; col < n && row < n; col++) {
-    // pivot keresése
-    let pivotRow = row;
-    for (let r = row + 1; r < n; r++) {
-      if (Math.abs(m[r][col]) > Math.abs(m[pivotRow][col])) {
-        pivotRow = r;
-      }
-    }
-    if (Math.abs(m[pivotRow][col]) < 1e-10) {
-      continue; // nincs pivot ebben az oszlopban
-    }
-
-    // sortcsere
-    if (pivotRow !== row) {
-      const tmp = m[row];
-      m[row] = m[pivotRow];
-      m[pivotRow] = tmp;
-    }
-
-    const pivot = m[row][col];
-    // normalizáljuk
-    for (let c = col; c < n; c++) {
-      m[row][c] /= pivot;
-    }
-    // lenullázzuk a többi sort
-    for (let r = 0; r < n; r++) {
-      if (r === row) continue;
-      const factor = m[r][col];
-      for (let c = col; c < n; c++) {
-        m[r][c] -= factor * m[row][c];
-      }
-    }
-
-    row++;
-    rank++;
-  }
-
-  return rank;
+// LaTeX-es mátrix (pmatrix)
+function matrixToLatex(A) {
+  const rows = A.map((row) => row.join(" & ")).join(" \\\\ ");
+  return `\\begin{pmatrix} ${rows} \\end{pmatrix}`;
 }
 
-// ------- Formázó függvények -------
-
-function formatVector(vec) {
-  return "(" + vec.map((x) => x.toFixed(2)).join(", ") + ")^T";
-}
-
-// Régi, egy soros mátrix – ha kell még valahova
-function formatMatrixInline(matrix) {
-  const rows = matrix.map((row) => "[" + row.join(", ") + "]");
-  return "[ " + rows.join("; ") + " ]";
-}
-
-// ÚJ: több soros, „LaTeX-szerű” mátrix karakterekből
-function formatMatrixPretty(name, matrix) {
-  const strRows = matrix.map((row) => row.map((x) => x.toString()));
-  let maxLen = 0;
-
-  strRows.forEach((row) => {
-    row.forEach((s) => {
-      if (s.length > maxLen) maxLen = s.length;
-    });
-  });
-
-  const pad = (s) => s.toString().padStart(maxLen, " ");
-  const rowToLine = (row) => "[ " + row.map(pad).join("  ") + " ]";
-  const prefix = name ? name + " = " : "";
-
-  const lines = strRows.map((row, idx) => {
-    const left = idx === 0 ? prefix : " ".repeat(prefix.length);
-    return left + rowToLine(row);
-  });
-
-  return lines.join("\n");
-}
-
-// Vektor oszlopvektorként, mátrix-formában
-function formatVectorPretty(name, vec) {
-  const matrix = vec.map((v) => [v]);
-  return formatMatrixPretty(name, matrix);
-}
-
-// ------- Feladattípus-generátorok -------
-
-function generateLinearSystemTask(idx, size, difficulty) {
-  const A = generateInvertibleMatrix(size, difficulty);
-  const solutionVec = [];
-  const baseRange = intRangeForDifficulty(difficulty);
-  for (let i = 0; i < size; i++) {
-    solutionVec.push(randInt(-baseRange, baseRange));
-  }
-
-  // b = A * x
-  const b = [];
-  for (let i = 0; i < size; i++) {
-    let sum = 0;
-    for (let j = 0; j < size; j++) {
-      sum += A[i][j] * solutionVec[j];
-    }
-    b.push(sum);
-  }
-
-  const taskText =
-    `${idx}. feladat (lineáris egyenletrendszer)\n` +
-    `Oldja meg az alábbi ${size} ismeretlenes lineáris egyenletrendszert ` +
-    `Gauss-eliminációval (pivotálással)!\n\n` +
-    `A · x = b,\n` +
-    `ahol\n` +
-    `${formatMatrixPretty("A", A)}\n` +
-    `${formatVectorPretty("b", b)}\n\n`;
-
-  const solutionText =
-    `${idx}. feladat megoldása\n` +
-    `Egy lehetséges lépésmenet pivotálásos Gauss-eliminációval adódik.\n` +
-    `A számolás eredményeként:\n` +
-    `x = ${formatVector(solutionVec)}\n\n`;
-
-  return { taskText, solutionText };
-}
-
-function generateDeterminantTask(idx, size, difficulty) {
-  const A = generateRandomMatrix(size, difficulty);
-  const det = determinant(A);
-
-  const taskText =
-    `${idx}. feladat (determináns)\n` +
-    `Számítsa ki az alábbi ${size}×${size} mátrix determinánsát!\n\n` +
-    `${formatMatrixPretty("A", A)}\n\n`;
-
-  const solutionText =
-    `${idx}. feladat megoldása\n` +
-    `det(A) = ${det}\n\n`;
-
-  return { taskText, solutionText };
-}
-
-function generateInverseTask(idx, size, difficulty) {
-  const A = generateInvertibleMatrix(size, difficulty);
+// Egyetlen feladat generálása: 3×3 inverz
+function generateSingleInverseTask() {
+  const A = generateNiceIntMatrix3x3();
   const inv = inverseMatrix(A);
 
-  const taskText =
-    `${idx}. feladat (mátrixinverz)\n` +
-    `Határozza meg az alábbi ${size}×${size} mátrix inverzét!\n\n` +
-    `${formatMatrixPretty("A", A)}\n\n`;
-
-  let solutionText =
-    `${idx}. feladat megoldása\n` +
-    `A Gauss–Jordan-elimináció során az [A | I] mátrixból [I | A⁻¹] adódik.\n`;
-  if (inv) {
-    const rounded = inv.map((row) => row.map((x) => +x.toFixed(2)));
-    solutionText +=
-      `Az eredmény:\n` +
-      `${formatMatrixPretty("A^-1", rounded)}\n\n`;
-  } else {
-    solutionText += `A mátrix szinguláris, így nincs inverze.\n\n`;
+  if (!inv) {
+    // nagyon ritkán: ha mégis szinguláris lett
+    return generateSingleInverseTask();
   }
 
-  return { taskText, solutionText };
+  // kerekítés egészre – elvileg eleve egész
+  const invInt = inv.map((row) => row.map((x) => Math.round(x)));
+
+  const taskHtml = `
+    <div class="zh-task">
+      <p><strong>1. feladat (mátrixinverz)</strong></p>
+      <p>Határozza meg az alábbi $3\\times3$ mátrix inverzét!</p>
+      <p>$$A = ${matrixToLatex(A)}$$</p>
+    </div>
+  `;
+
+  const solutionHtml = `
+    <div class="zh-solution">
+      <p><strong>1. feladat megoldása</strong></p>
+      <p>A Gauss–Jordan-elimináció során az $[A \\mid I]$ mátrixból $[I \\mid A^{-1}]$ adódik.</p>
+      <p>Az eredmény:</p>
+      <p>$$A^{-1} = ${matrixToLatex(invInt)}$$</p>
+    </div>
+  `;
+
+  return { taskHtml, solutionHtml };
 }
 
-function generateRankTask(idx, size, difficulty) {
-  const A = generateRandomMatrix(size, difficulty);
-  const r = rankOfMatrix(A);
-
-  const taskText =
-    `${idx}. feladat (rang)\n` +
-    `Határozza meg az alábbi ${size}×${size} mátrix rangját!\n\n` +
-    `${formatMatrixPretty("A", A)}\n\n`;
-
-  const solutionText =
-    `${idx}. feladat megoldása\n` +
-    `Pivotálásos Gauss-eliminációval sorredukált alakba visszük A-t.\n` +
-    `A nemnulla sorok száma a rang:\n` +
-    `rang(A) = ${r}\n\n`;
-
-  return { taskText, solutionText };
-}
-
-// ------- ZH teljes generálása -------
-
-function generateZhFromForm(options) {
-  const { size, difficulty, numLinear, numDet, numInv, numRank } = options;
-
-  let idx = 1;
-  let tasks = "";
-  let solutions = "";
-
-  for (let i = 0; i < numLinear; i++, idx++) {
-    const { taskText, solutionText } = generateLinearSystemTask(
-      idx,
-      size,
-      difficulty
-    );
-    tasks += taskText;
-    solutions += solutionText;
-  }
-
-  for (let i = 0; i < numDet; i++, idx++) {
-    const { taskText, solutionText } = generateDeterminantTask(
-      idx,
-      size,
-      difficulty
-    );
-    tasks += taskText;
-    solutions += solutionText;
-  }
-
-  for (let i = 0; i < numInv; i++, idx++) {
-    const { taskText, solutionText } = generateInverseTask(
-      idx,
-      size,
-      difficulty
-    );
-    tasks += taskText;
-    solutions += solutionText;
-  }
-
-  for (let i = 0; i < numRank; i++, idx++) {
-    const { taskText, solutionText } = generateRankTask(
-      idx,
-      size,
-      difficulty
-    );
-    tasks += taskText;
-    solutions += solutionText;
-  }
-
-  if (!tasks) {
-    tasks =
-      "Nem lett kiválasztva egyetlen feladattípus sem. " +
-      "Adj meg legalább egy darabszámot a generáláshoz.\n";
-    solutions = "Nincs megoldókulcs, mert nincs generált feladat.\n";
-  }
-
-  return { tasks, solutions };
-}
-
-function updateZhOutputs(tasks, solutions) {
+// Kimenet frissítése
+function updateZhOutputs(tasksHtml, solutionsHtml) {
   const tasksEl = document.getElementById("zhTasksOutput");
   const solEl = document.getElementById("zhSolutionsOutput");
-  if (tasksEl) tasksEl.textContent = tasks;
-  if (solEl) solEl.textContent = solutions;
 
-  lastZhTasksText = tasks;
-  lastZhSolutionsText = solutions;
+  if (tasksEl) tasksEl.innerHTML = tasksHtml;
+  if (solEl) solEl.innerHTML = solutionsHtml;
 
-  // PDF gombok engedélyezése
-  const btnZh = document.getElementById("btn-download-zh");
-  const btnSol = document.getElementById("btn-download-solutions");
-  if (btnZh) btnZh.disabled = false;
-  if (btnSol) btnSol.disabled = false;
+  hasGeneratedZh = !!tasksHtml;
+
+  const btnPrintTasks = document.getElementById("btn-print-tasks");
+  const btnPrintAll = document.getElementById("btn-print-all");
+  const btnShowSolutions = document.getElementById("btn-show-solutions");
+
+  if (btnPrintTasks) btnPrintTasks.disabled = !hasGeneratedZh;
+  if (btnPrintAll) btnPrintAll.disabled = !hasGeneratedZh;
+  if (btnShowSolutions) btnShowSolutions.disabled = !hasGeneratedZh;
+
+  // új feladatnál mindig task-only nézet legyen
+  document.body.classList.remove("solutions-visible");
+  if (btnShowSolutions) {
+    btnShowSolutions.textContent = "Megoldókulcs megjelenítése";
+  }
+
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise([tasksEl, solEl]).catch((err) =>
+      console.error(err.message)
+    );
+  }
 }
 
-// ------- PDF generálás jsPDF-vel -------
-
-function downloadPdf(type) {
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("A PDF generáláshoz szükséges jsPDF könyvtár nem érhető el.");
+// Megoldókulcs megjelenítése/elrejtése (csak WEB)
+function toggleSolutionsVisibility() {
+  if (!hasGeneratedZh) {
+    alert("Előbb generálj egy feladatot!");
     return;
   }
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const body = document.body;
+  const btn = document.getElementById("btn-show-solutions");
 
-  const isZh = type === "zh";
-  const title = isZh ? "ZH feladatsor" : "Megoldókulcs";
-  const text = isZh ? lastZhTasksText : lastZhSolutionsText;
+  body.classList.toggle("solutions-visible");
 
-  doc.setFont("Courier", "Normal"); // monospaced, hogy a mátrix szépen álljon
-  doc.setFontSize(14);
-  doc.text(`Pivot Point – ${title}`, 10, 15);
+  if (btn) {
+    btn.textContent = body.classList.contains("solutions-visible")
+      ? "Megoldókulcs elrejtése"
+      : "Megoldókulcs megjelenítése";
+  }
 
-  doc.setFontSize(11);
-  const marginLeft = 10;
-  const maxWidth = 190 - marginLeft;
-  const lines = doc.splitTextToSize(text, maxWidth);
-
-  let y = 25;
-  const lineHeight = 6;
-
-  lines.forEach((line) => {
-    if (y > 280) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.text(line, marginLeft, y);
-    y += lineHeight;
-  });
-
-  const filename = isZh ? "zh_feladatlap.pdf" : "zh_megoldokulcs.pdf";
-  doc.save(filename);
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch((err) => console.error(err.message));
+  }
 }
 
-// ------- Eseménykezelők -------
+// Közös segédfüggvény a print mód beállításához
+function setPrintMode(modeClass) {
+  document.body.classList.remove("print-mode-tasks", "print-mode-all");
+  if (modeClass) {
+    document.body.classList.add(modeClass);
+  }
+}
 
+// Belső: PDF generálás (valójában böngésző print + Mentés PDF-be)
+function printWithMode(modeClass) {
+  if (!hasGeneratedZh) {
+    alert("Előbb generálj egy feladatot!");
+    return;
+  }
+
+  const oldClassName = document.body.className;
+
+  setPrintMode(modeClass);
+
+  const doPrint = () => {
+    window.print();
+    document.body.className = oldClassName; // visszaállítjuk az eredeti állapotot
+  };
+
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise()
+      .then(doPrint)
+      .catch((err) => {
+        console.error(err.message);
+        doPrint();
+      });
+  } else {
+    doPrint();
+  }
+}
+
+// Csak feladatok PDF
+function printTasksOnly() {
+  printWithMode("print-mode-tasks");
+}
+
+// Feladat + megoldás PDF
+function printTasksAndSolutions() {
+  printWithMode("print-mode-all");
+}
+
+// Eseménykezelők
 document.addEventListener("DOMContentLoaded", () => {
   const btnGenerate = document.getElementById("btn-generate-zh");
-  const btnZh = document.getElementById("btn-download-zh");
-  const btnSol = document.getElementById("btn-download-solutions");
+  const btnPrintTasks = document.getElementById("btn-print-tasks");
+  const btnPrintAll = document.getElementById("btn-print-all");
+  const btnShowSolutions = document.getElementById("btn-show-solutions");
 
   if (btnGenerate) {
     btnGenerate.addEventListener("click", () => {
-      const size = parseInt(
-        document.getElementById("matrix-size").value,
-        10
-      );
-      const difficulty = document.getElementById("difficulty").value;
-
-      const numLinear = parseInt(
-        document.getElementById("num-linear").value || "0",
-        10
-      );
-      const numDet = parseInt(
-        document.getElementById("num-det").value || "0",
-        10
-      );
-      const numInv = parseInt(
-        document.getElementById("num-inv").value || "0",
-        10
-      );
-      const numRank = parseInt(
-        document.getElementById("num-rank").value || "0",
-        10
-      );
-
-      const { tasks, solutions } = generateZhFromForm({
-        size,
-        difficulty,
-        numLinear,
-        numDet,
-        numInv,
-        numRank,
-      });
-
-      updateZhOutputs(tasks, solutions);
+      const { taskHtml, solutionHtml } = generateSingleInverseTask();
+      updateZhOutputs(taskHtml, solutionHtml);
     });
   }
 
-  if (btnZh) {
-    btnZh.addEventListener("click", () => downloadPdf("zh"));
+  if (btnShowSolutions) {
+    btnShowSolutions.addEventListener("click", toggleSolutionsVisibility);
   }
-  if (btnSol) {
-    btnSol.addEventListener("click", () => downloadPdf("solutions"));
+
+  if (btnPrintTasks) {
+    btnPrintTasks.addEventListener("click", printTasksOnly);
+  }
+
+  if (btnPrintAll) {
+    btnPrintAll.addEventListener("click", printTasksAndSolutions);
   }
 });
