@@ -10,6 +10,10 @@
   --radius-xl: 26px;
 }
 
+/* =========================
+   ALAP BEÁLLÍTÁSOK
+========================= */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -28,7 +32,9 @@ body {
   line-height: 1.6;
 }
 
-/* NAVBAR */
+/* =========================
+   NAVBAR
+========================= */
 
 header {
   position: sticky;
@@ -75,6 +81,12 @@ header {
   color: #fdf7ef;
   font-size: 0.8rem;
   box-shadow: var(--shadow-soft);
+}
+
+.nav-links-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1;
 }
 
 nav ul {
@@ -140,7 +152,7 @@ nav a:hover::after {
   box-shadow: 0 6px 15px rgba(123, 74, 45, 0.35);
 }
 
-/* MOBILE NAV */
+/* Mobil menü gomb */
 
 .nav-toggle {
   display: none;
@@ -158,12 +170,6 @@ nav a:hover::after {
   background: var(--color-primary);
   border-radius: 999px;
   transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.nav-links-wrapper {
-  display: flex;
-  justify-content: flex-end;
-  flex: 1;
 }
 
 @media (max-width: 768px) {
@@ -201,7 +207,9 @@ nav a:hover::after {
   }
 }
 
-/* MAIN LAYOUT */
+/* =========================
+   MAIN LAYOUT
+========================= */
 
 main {
   max-width: 1100px;
@@ -209,7 +217,9 @@ main {
   padding: 2.5rem 1rem 4rem;
 }
 
-/* HERO */
+/* =========================
+   HERO / KEZDŐLAP
+========================= */
 
 .hero {
   min-height: calc(100vh - 60px);
@@ -330,7 +340,7 @@ main {
   background: var(--color-accent);
 }
 
-/* HERO CARD */
+/* Hero kártya */
 
 .hero-card {
   background: linear-gradient(
@@ -415,7 +425,9 @@ main {
   }
 }
 
-/* SECTIONS */
+/* =========================
+   SZEKCIÓK
+========================= */
 
 .section {
   margin-top: 3rem;
@@ -453,101 +465,9 @@ main {
   margin-bottom: 1.5rem;
 }
 
-.section-grid {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.section-grid.two-cols {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.section-grid.three-cols {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-@media (max-width: 900px) {
-  .section-grid.two-cols,
-  .section-grid.three-cols {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* KÁRTYÁK, TIPPEK – változatlan, kihagyom a részletes kommentet */
-
-.section-pill {
-  padding: 1.25rem 1.1rem;
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(123, 74, 45, 0.12);
-}
-
-.section-pill h3 {
-  margin-bottom: 0.6rem;
-  font-size: 1.05rem;
-  color: var(--color-primary);
-}
-
-.section-pill ul {
-  list-style: disc;
-  padding-left: 1.2rem;
-  font-size: 0.95rem;
-}
-
-.feature-card {
-  padding: 1.2rem 1.1rem;
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(123, 74, 45, 0.12);
-}
-
-.feature-card h3 {
-  font-size: 1.02rem;
-  margin-bottom: 0.4rem;
-  color: var(--color-primary);
-}
-
-.feature-card p {
-  font-size: 0.94rem;
-}
-
-.tips-grid {
-  margin-top: 0.25rem;
-}
-
-.tip-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.9rem;
-  padding: 0.9rem 0.4rem;
-}
-
-.tip-number {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: rgba(224, 184, 120, 0.2);
-  border: 1px solid rgba(224, 184, 120, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-.tip-item h3 {
-  font-size: 1.02rem;
-  margin-bottom: 0.25rem;
-  color: var(--color-primary);
-}
-
-.tip-item p {
-  font-size: 0.93rem;
-}
-
-/* ZH GENERÁTOR */
+/* =========================
+   ZH GENERÁTOR
+========================= */
 
 .section-zh-card {
   background: linear-gradient(
@@ -582,7 +502,13 @@ main {
   align-items: flex-start;
 }
 
-/* FORM */
+@media (max-width: 900px) {
+  .zh-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Form */
 
 .zh-form {
   display: flex;
@@ -596,16 +522,16 @@ main {
   flex-wrap: wrap;
 }
 
-.field-row-multi {
-  flex-wrap: wrap;
-}
-
 .field-group {
   flex: 1;
   min-width: 150px;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.field-group-inline {
+  max-width: 260px;
 }
 
 .field-label {
@@ -631,6 +557,19 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(183, 123, 79, 0.35);
 }
 
+#task-count {
+  font-size: 1.05rem;
+  text-align: center;
+  padding: 0.6rem 0.75rem;
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.8rem;
+  color: #7b6454;
+  margin-top: 0.15rem;
+}
+
 .buttons-row {
   flex-wrap: wrap;
 }
@@ -645,11 +584,11 @@ select:focus {
   margin-top: 0.3rem;
 }
 
-/* OUTPUT */
+/* Output – egy oszlop, párok egymás alatt */
 
 .zh-output {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -671,29 +610,44 @@ select:focus {
   margin: 0.25rem 0;
 }
 
-.zh-task + .zh-task,
-.zh-solution + .zh-solution {
+/* feladat+megoldás párok */
+
+.zh-pair + .zh-pair {
   margin-top: 0.75rem;
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
   border-top: 1px dashed rgba(123, 74, 45, 0.2);
 }
 
-@media (max-width: 900px) {
-  .zh-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .zh-output {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .section-header-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* ZH-fejléc – alapból rejtve, csak nyomtatásban látszik */
+.zh-exam-header {
+  display: none;
 }
 
-/* FOOTER */
+/* Megoldás blokk – weben „faltól falig” háttérrel */
+
+.zh-solution {
+  margin-top: 0.5rem;
+
+  /* a .zh-output-div vízszintes paddingje 0.9rem,
+     ezt ellensúlyozzuk, hogy a háttér a kártya széléig érjen */
+  margin-left: -0.9rem;
+  margin-right: -0.9rem;
+
+  padding: 0.65rem 0.9rem;
+  border-left: none;
+  border-radius: 12px;
+  background: rgba(244, 228, 210, 0.6);
+  font-size: 0.94rem;
+  display: none;
+}
+
+body.solutions-visible .zh-solution {
+  display: block;
+}
+
+/* =========================
+   FOOTER
+========================= */
 
 .site-footer {
   margin-top: 3rem;
@@ -793,103 +747,130 @@ select:focus {
   opacity: 0.9;
 }
 
-/* ===== PRINT BEÁLLÍTÁSOK ===== */
+/* =========================
+   PRINT STÍLUS (PDF)
+========================= */
 
 @media print {
+  /* Fekete–fehér, fehér háttér */
   body {
-    background: #ffffff;
+    background: #ffffff !important;
+    color: #000000 !important;
   }
 
-  .no-print {
-    display: none !important;
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  strong,
+  em,
+  li,
+  a {
+    color: #000000 !important;
   }
 
+  /* Fejléc, hero, footer, .no-print rejtése */
+  .no-print,
   header,
-  .site-footer {
+  .site-footer,
+  .hero {
     display: none !important;
   }
 
   main {
     max-width: 100%;
     padding: 0;
+    margin: 0;
   }
 
-  .section-zh-card {
-    box-shadow: none;
-    border: none;
-    border-radius: 0;
-  }
-
-  #zh-generator {
-    margin-top: 0;
-  }
-}
-
-
-/* Megoldókulcs: alapból rejtve, csak kérésre látszik */
-#solutionsColumn {
-  display: none;
-}
-
-/* Ha a body-n rajta van a solutions-visible osztály, akkor mutatjuk */
-body.solutions-visible #solutionsColumn {
-  display: block;
-}
-
-/* Amikor csak feladatok vannak, a rács legyen 1 oszlopos */
-body:not(.solutions-visible) .zh-output {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* Nyomtatásnál is érvényesek legyenek ezek a szabályok */
-@media print {
-  body.solutions-visible #solutionsColumn {
-    display: block !important;
-  }
-
-  body:not(.solutions-visible) #solutionsColumn {
+  /* ZH-szekció eredeti címe + lead + "ZH feladatok" alcím NE látszódjon */
+  #zh-generator .section-header-row,
+  #zh-generator .zh-output-column h3 {
     display: none !important;
   }
 
-  body:not(.solutions-visible) .zh-output {
-    grid-template-columns: minmax(0, 1fr);
+  /* Kártyák, boxok: keret, árnyék nélkül, sima fehér */
+  .section-card,
+  .section-zh-card,
+  .zh-output-div {
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
-}
 
-/* --- Megoldókulcs oszlop alapból rejtve --- */
-#solutionsColumn {
-  display: none;
-}
+  /* ZH-fejléc (Miskolci Egyetem stb.) – csak nyomtatásban látszik */
+  .zh-exam-header {
+    display: block !important;
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+  }
 
-/* Weben: ha a body-n rajta van a solutions-visible osztály, akkor látszik */
-body.solutions-visible #solutionsColumn {
-  display: block;
-}
+  .zh-exam-header-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.6rem;
+  }
 
-/* Webes elrendezés: ha nincs megoldás, 1 oszlop; ha van, 2 oszlop */
-body.solutions-visible .zh-output {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-body:not(.solutions-visible) .zh-output {
-  grid-template-columns: minmax(0, 1fr);
-}
+  .zh-exam-header-right {
+    text-align: right;
+  }
 
-/* Nyomtatás: két külön „mód” a body-n:
-   - print-mode-tasks: csak feladatok
-   - print-mode-all: feladat + megoldás
-*/
-@media print {
-  body.print-mode-tasks #solutionsColumn {
+  .zh-exam-header-center {
+    text-align: center;
+    margin-top: 1.4rem;
+    font-size: 0.95rem;
+  }
+
+  .zh-exam-subject {
+    font-variant: small-caps;
+  }
+
+  /* Megoldások nyomtatása:
+     - tasks PDF-ben rejtve
+     - all PDF-ben látszanak, fehér háttérrel, normál margóval */
+  .zh-solution {
     display: none !important;
   }
-  body.print-mode-all #solutionsColumn {
+
+  body.print-mode-all .zh-solution {
+    display: block !important;
+    border-left: none !important;
+    background: #ffffff !important;
+    border-radius: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* párok egymás alatt, de oldaltörések */
+  .zh-output {
     display: block !important;
   }
 
-  body.print-mode-tasks .zh-output {
-    grid-template-columns: minmax(0, 1fr);
+  /* Csak feladatok PDF:
+     minden feladat+megoldás-pár új oldal (megoldás itt nem látszik) */
+  body.print-mode-tasks .zh-pair {
+    page-break-after: always;
   }
-  body.print-mode-all .zh-output {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  body.print-mode-tasks .zh-pair:last-child {
+    page-break-after: auto;
+  }
+
+  /* Feladat + megoldás PDF:
+     minden pár (fejléc + feladat + saját megoldás) egy oldalon */
+  body.print-mode-all .zh-pair {
+    page-break-after: always;
+  }
+
+  body.print-mode-all .zh-pair:last-child {
+    page-break-after: auto;
   }
 }

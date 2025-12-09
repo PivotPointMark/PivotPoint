@@ -27,6 +27,7 @@
   <script src="main.js" defer></script>
 </head>
 <body>
+  <!-- NAVBAR -->
   <header class="no-print">
     <div class="nav-container">
       <div class="logo">
@@ -73,9 +74,8 @@
         </h1>
 
         <p class="hero-subtitle">
-          A jelenlegi demó egyetlen feladatot generál:
-          <strong>egy 3×3-as mátrix inverzét</strong>, szépen kiszámolható
-          egész inverz-mátrixszal.
+          A jelenlegi demó 3×3-as mátrixok inverzét kérdező feladatokat generál.
+          Minden feladatnak létezik „szép”, egész elemes inverze.
         </p>
 
         <div class="hero-actions">
@@ -98,7 +98,7 @@
         <div class="hero-card-header">
           <div>
             <div class="hero-card-title">Aktuális demó</div>
-            <small>Mátrixinverz feladat</small>
+            <small>Mátrixinverz feladatok</small>
           </div>
           <div class="hero-badge">3×3 inverz</div>
         </div>
@@ -107,28 +107,28 @@
           <div class="hero-card-item">
             <div class="hero-card-bullet">1</div>
             <div>
-              Egy véletlen <strong>3×3-as mátrixot</strong> generálunk,
-              amelynek determinánsa ±1.
+              Állítsd be a feladatok számát (pl. <strong>5</strong>), majd generáld a
+              feladatsort.
             </div>
           </div>
           <div class="hero-card-item">
             <div class="hero-card-bullet">2</div>
             <div>
-              A feladat: „Határozza meg az alábbi mátrix inverzét!”
+              Minden feladat alatt közvetlenül a saját
+              <strong>megoldókulcsa</strong> jelenik meg (ha bekapcsolod).
             </div>
           </div>
           <div class="hero-card-item">
             <div class="hero-card-bullet">3</div>
             <div>
-              A megoldókulcsban a <strong>valódi inverz-mátrix</strong> látható,
-              MathJax-szal szedve.
+              Kétféle PDF: csak feladatok vagy feladat + megoldás, oldaltörésekkel.
             </div>
           </div>
         </div>
 
         <div class="hero-card-footer">
           <span>Alap demó – később jönnek a többi feladattípusok.</span>
-          <span>Nyomtatáshoz használd a „Feladatlap PDF” gombot.</span>
+          <span>A PDF-nél használd a böngésző „Mentés PDF-be” opcióját.</span>
         </div>
       </aside>
     </section>
@@ -139,8 +139,8 @@
         <h2 class="section-title">Mi a weboldal célja?</h2>
         <p class="section-lead">
           A <strong>Pivot Point</strong> egy oktatást segítő eszköz, amely
-          lineáris algebra ZH-k és gyakorló feladatsorok gyors
-          generálásában segít. A mostani demó az inverz-mátrix feladattípusra fókuszál.
+          lineáris algebra vizsgafeladatok és ZH-k gyors generálásában segít.
+          A jelenlegi prototípus a 3×3-as mátrixinverz feladattípusra koncentrál.
         </p>
       </div>
     </section>
@@ -150,7 +150,8 @@
       <div class="section-card section-card-alt">
         <h2 class="section-title">Minek tanuljak Lineáris Algebrát?</h2>
         <p class="section-lead">
-          A lineáris algebra az adattudomány, optimalizálás, grafika és sok más terület alapnyelve.
+          A lineáris algebra az adatelemzés, optimalizálás, gépi tanulás,
+          számítógépes grafika és sok más terület alapnyelve.
         </p>
       </div>
     </section>
@@ -160,35 +161,46 @@
       <div class="section-card section-card-light">
         <h2 class="section-title">Legyen neked is 5-ös Lineáris Algebrából</h2>
         <p class="section-lead">
-          A rendszerrel célzottan tudsz gyakorolni inverz-mátrix feladatokat is.
+          A Pivot Point segítségével célzottan tudsz gyakorolni inverz-mátrix
+          feladatokat is, részletes megoldókulccsal.
         </p>
       </div>
     </section>
 
-    <!-- ZH GENERÁTOR – FELADAT + MEGOLDÁS + 2 PDF GOMB -->
+    <!-- ZH GENERÁTOR -->
     <section id="zh-generator" class="section">
       <div class="section-card section-zh-card">
         <div class="section-header-row">
           <div>
-            <h2 class="section-title">ZH feladat (3×3 mátrixinverz)</h2>
+            <h2 class="section-title">ZH feladatsor (3×3 mátrixinverz)</h2>
             <p class="section-lead">
-              A demó egyetlen feladatot generál: egy 3×3-as mátrixot,
-              amelynek inverze létezik és egész számokból áll.
+              Add meg, hány feladatot szeretnél (pl. 5), majd generáld le a
+              feladatsort. A megoldókulcs minden feladat alatt jelenik meg.
             </p>
           </div>
           <div class="badge-soft no-print">Alfa verzió</div>
         </div>
 
         <div class="zh-layout">
-          <!-- BAL: GOMBOK (csak weben látszik) -->
+          <!-- BAL: BEÁLLÍTÁSOK + GOMBOK (csak weben) -->
           <form id="zh-form" class="zh-form no-print" onsubmit="return false;">
-            <p class="field-label">
-              Kattints a gombra egy új 3×3-as mátrix-inverz feladat generálásához.
-            </p>
+            <div class="field-group field-group-inline">
+              <label for="task-count" class="field-label">Feladatok száma</label>
+              <input
+                id="task-count"
+                type="number"
+                min="1"
+                max="30"
+                value="5"
+              />
+              <span class="field-hint">
+                1–30 között. Ez vonatkozik a webes nézetre és a PDF-ekre is.
+              </span>
+            </div>
 
             <div class="field-row buttons-row">
               <button type="button" id="btn-generate-zh" class="btn-main btn-primary">
-                Feladat generálása
+                Feladatsor generálása
               </button>
               <button
                 type="button"
@@ -202,7 +214,6 @@
                 type="button"
                 id="btn-print-tasks"
                 class="btn-main btn-secondary"
-                disabled
               >
                 Feladatlap PDF
               </button>
@@ -210,33 +221,30 @@
                 type="button"
                 id="btn-print-all"
                 class="btn-main btn-secondary"
-                disabled
               >
                 Feladat + megoldás PDF
               </button>
             </div>
 
             <p class="note-small">
-              <strong>Feladat generálása</strong>: új 3×3-as mátrix inverz feladat.<br />
-              <strong>Megoldókulcs megjelenítése</strong>: csak a weblapon kapcsolja be/ki a megoldást.<br />
-              <strong>Feladatlap PDF</strong>: csak a feladatok.<br />
-              <strong>Feladat + megoldás PDF</strong>: feladatok és megoldókulcs egyben.
+              <strong>Feladatsor generálása</strong> – weben megjelenik az összes
+              feladat, a megoldásokat külön gombbal tudod bekapcsolni.<br />
+              <strong>Feladatlap PDF</strong> – csak a feladatok, minden feladat
+              külön oldalon.<br />
+              <strong>Feladat + megoldás PDF</strong> – minden feladat alatt a
+              saját megoldása, páronként külön oldalon.
             </p>
           </form>
 
           <!-- JOBB: KIMENET -->
           <div class="zh-output">
             <div class="zh-output-column">
-              <h3>ZH feladat</h3>
-              <div id="zhTasksOutput" class="zh-output-div">
-                <p>Még nem készült feladat. Kattints a „Feladat generálása” gombra.</p>
-              </div>
-            </div>
-
-            <div class="zh-output-column" id="solutionsColumn">
-              <h3>Megoldókulcs</h3>
-              <div id="zhSolutionsOutput" class="zh-output-div">
-                <p>Még nem készült megoldókulcs.</p>
+              <h3>ZH feladatok</h3>
+              <div id="zhOutput" class="zh-output-div">
+                <p>
+                  Még nem készült feladatsor. Állítsd be a darabszámot, majd kattints
+                  a „Feladatsor generálása” gombra.
+                </p>
               </div>
             </div>
           </div>
@@ -244,7 +252,6 @@
         </div>
       </div>
     </section>
-
   </main>
 
   <!-- FOOTER -->
@@ -253,14 +260,20 @@
       <div class="footer-main">
         <p class="footer-brand">Pivot Point</p>
         <p class="footer-credit">
-          Készítette:
-          <strong>Molnár Márk – TLZ12Y</strong><br />
-          <span>Miskolci Egyetem &middot; 2026</span>
+          Készítette: <strong>Molnár Márk – TLZ12Y</strong><br />
+          <span>Miskolci Egyetem · 2026</span>
         </p>
       </div>
 
       <div class="footer-links">
-        <a href="#" class="footer-link">GitHub (hamarosan)</a>
+        <a
+          href="https://github.com/PivotPointMark/PivotPoint"
+          target="_blank"
+          rel="noopener"
+          class="footer-link"
+        >
+          GitHub – forráskód
+        </a>
         <a href="#celunk" class="footer-link">About</a>
         <a href="mailto:your.email@example.com" class="footer-link">Contact</a>
       </div>
