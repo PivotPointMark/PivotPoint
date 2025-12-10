@@ -1304,3 +1304,90 @@ input[type="number"] {
 .grid-category-title:first-of-type {
   margin-top: 1.5rem;
 }
+
+/* =========================
+   ZH GENERÁTOR CHECKBOXOK (MODERN STÍLUS)
+========================= */
+
+/* A konténer elrendezése */
+#zh-form .field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* Maga a gomb (label) alapállapota */
+#zh-form .field-row label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.2rem;
+  background-color: #ffffff;
+  border: 1px solid rgba(123, 74, 45, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6b5241;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  user-select: none;
+}
+
+/* Hover effekt (ha ráviszed az egeret) */
+#zh-form .field-row label:hover {
+  background-color: #fffbf7;
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(123, 74, 45, 0.1);
+}
+
+/* KIVÁLASZTOTT ÁLLAPOT (Amikor be van pipálva) */
+/* A :has() szelektor modern böngészőkben működik */
+#zh-form .field-row label:has(input:checked) {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 6px 12px rgba(123, 74, 45, 0.25);
+  transform: translateY(-1px);
+}
+
+/* A kis négyzet (input) elrejtése vagy átformázása */
+#zh-form .field-row input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #dcbfa8; /* Halvány keret alapból */
+  border-radius: 6px;
+  background-color: white;
+  display: grid;
+  place-content: center;
+  transition: all 0.2s;
+  margin: 0;
+}
+
+/* Ha a szülő aktív, a checkbox kerete legyen fehér */
+#zh-form .field-row label:has(input:checked) input[type="checkbox"] {
+  border-color: rgba(255,255,255,0.8);
+  background-color: rgba(255,255,255,0.2);
+}
+
+/* Pipa a checkboxban */
+#zh-form .field-row input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0); /* Alapból nem látszik */
+  transition: 0.15s transform ease-in-out;
+  background-color: var(--color-primary); /* Pipa színe alapból */
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); /* Pipa alak */
+}
+
+/* Ha be van pipálva, jelenjen meg a pipa */
+#zh-form .field-row input[type="checkbox"]:checked::before {
+  transform: scale(1);
+  background-color: white; /* Fehér pipa a barna háttéren */
+}
