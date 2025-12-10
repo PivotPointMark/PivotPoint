@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inverz Mátrix – Pivot Point</title>
+  <title>Pivotálás – Pivot Point</title>
 
   <script>
     window.MathJax = {
@@ -15,7 +15,7 @@
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   
@@ -31,21 +31,21 @@
   <main>
     <section class="section">
       <div class="section-card">
-        <h1 class="section-title">Inverz Mátrix Számítás</h1>
+        <h1 class="section-title">Pivotálás (Bázistranszformáció)</h1>
         
         <p class="section-lead">
-          A Gauss-Jordan elimináció segítségével meghatározhatjuk egy négyzetes mátrix inverzét. 
-          A módszer lényege, hogy az $[A \mid I]$ kibővített mátrixot elemi sorműveletekkel 
-          $[I \mid A^{-1}]$ alakra hozzuk.
+          Gyakorold a Gauss-elimináció lépéseit! Adj meg egy mátrixot, válassz pivot elemet, 
+          és a rendszer elvégzi a számolást lépésről lépésre.
         </p>
         <p style="margin-bottom: 2rem; color: #6b5241;">
-          Itt interaktívan végigkövetheted a folyamatot: töltsd ki a mátrixot, majd válassz pivot elemeket. 
-          A rendszer párhuzamosan végzi a műveleteket az egységmátrixon is.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac scelerisque lectus. 
+          Vivamus quis erat nec nisi vehicula interdum. A Gauss-Jordan elimináció során célunk, 
+          hogy a pivot elemek segítségével nullázzuk az oszlopok többi elemét.
         </p>
 
         <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
 
-        <div id="inverse-app-container" class="app-container">
+        <div id="pivot-app-container" class="app-container">
           
           <div class="control-panel">
             <div class="field-group field-group-inline">
@@ -58,7 +58,7 @@
           </div>
 
           <div id="matrix-input-wrapper" class="matrix-input-wrapper hidden">
-            <p class="instruction-text">Töltsd ki az 'A' mátrix elemeit:</p>
+            <p class="instruction-text">Töltsd ki a mátrix elemeit (az üres mező 0-nak számít):</p>
             
             <div id="matrix-grid" class="matrix-grid"></div>
             
@@ -66,18 +66,19 @@
               <button id="btn-fill-random" class="btn-main btn-secondary" style="margin-right: 0.5rem;">
                 Véletlen kitöltés (-10...10)
               </button>
+              
               <button id="btn-show-matrix" class="btn-main btn-primary">
-                Inverz számítás indítása
+                Mátrix megjelenítése
               </button>
             </div>
           </div>
 
           <div id="matrix-display-area" class="matrix-display-area hidden">
-            <h3 id="step-title">Induló állapot $[A \mid I]$</h3>
+            <h3 id="step-title">1. lépés: Válassz pivot elemet!</h3>
             
             <div id="singular-warning" class="error-banner hidden">
-              ⚠️ <strong>Figyelem:</strong> A mátrix determinánsa <strong>0</strong> (szinguláris). 
-              Nincs inverze, a folyamat nem vihető végig az egységmátrixig!
+              ⚠️ <strong>Figyelem:</strong> A mátrix determinánsa <strong>0</strong>. 
+              Ebből nem lehet egységmátrixot előállítani (a folyamat el fog akadni)!
             </div>
 
             <div id="latex-output" class="math-display"></div>
@@ -96,7 +97,7 @@
     </section>
   </main>
 
-  <script src="../js/tasks.js"></script> 
-  <script src="../js/inverse.js"></script> 
+  <script src="js/tasks.js"></script> 
+  <script src="js/pivot.js"></script> 
 </body>
 </html>
