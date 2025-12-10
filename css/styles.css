@@ -1404,3 +1404,45 @@ input[type="number"] {
   display: inline-block;
   font-family: monospace; /* Hogy olyan "számlálós" legyen */
 }
+
+/* =========================
+   GENERÁLÁS VISSZAJELZŐ ÜZENET
+========================= */
+
+.generation-result {
+  margin-top: 1.5rem;      /* Távolság a gomboktól */
+  margin-bottom: 1rem;     /* Távolság a lenti szövegtől */
+  padding: 1rem;
+  background-color: #f0f9ff; /* Halványkék háttér */
+  border: 1px solid #bae6fd; /* Kék keret */
+  border-radius: 8px;      /* Lekerekített sarkok */
+  color: #0369a1;          /* Sötétkék szöveg */
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;      /* Középre igazítás */
+  
+  /* Kis animáció, hogy szépen jelenjen meg */
+  animation: slideIn 0.5s ease-out;
+}
+
+.generation-result strong {
+  font-size: 1.2rem;
+  color: #0284c7;        /* A szám legyen feltűnőbb kék */
+}
+
+.gen-icon {
+  font-size: 1.4rem;     /* A konfetti ikon mérete */
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Ez az osztály tünteti el, amíg nem kattintasz */
+.hidden {
+  display: none !important;
+}
+
+/* Animáció definíciója */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
