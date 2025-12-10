@@ -209,6 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnGenerate) {
     btnGenerate.addEventListener("click", handleGenerateClick);
+    trackEvent("zh_generated");
   }
 
   if (btnShowSolutions) {
@@ -225,46 +226,74 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ======================
-// LÁTOGATÓ SZÁMLÁLÓ (CounterAPI.dev)
+// ZH GENERÁLÁS SZÁMLÁLÓ (Kijelzéssel)
 // ======================
 
+// 1. Amikor az oldal betöltődik, kérjük le a JELENLEGI számot (növelés nélkül)
 document.addEventListener("DOMContentLoaded", () => {
-    updateVisitorCount();
+    fetchGenCount();
+    
+    // Eseményfigyelő a generálás gombra (ha létezik az oldalon)
+    const btnGenerate = document.getElementById("btn-generate-zh");
+    if (btnGenerate) {
+        btnGenerate.addEventListener("click", () => {
+            incrementGenCount();
+        });
+    }
 });
 
-async function updateVisitorCount() {
-    const counterElement = document.getElementById("visit-count");
-    
-    if (!counterElement) return;
+// KONFIGURÁCIÓ
+const API_NAMESPACE = "pivot-point-szakdolgozat-mark";
+const API_KEY = "zh_generated"; // Fontos: Ez ugyanaz a kulcs legyen!
 
-    // EGYEDI AZONOSÍTÓ:
-    // Ez a namespace. Fontos, hogy egyedi legyen, hogy ne más oldalét számold!
-    // Mivel GitHubon vagy, használjuk a repód nevét vagy egyedi stringet.
-    const namespace = "pivot-point-szakdolgozat-mark"; 
-    const key = "view_count";
+// A. Csak lekérdezés (Read-only)
+async function fetchGenCount() {
+    const displayEl = document.getElementById("gen-count");
+    if (!displayEl) return;
 
     try {
-        // ÚJ API SZOLGÁLTATÁS: counterapi.dev
-        // A '/up' végződés növeli a számlálót 1-gyel
-        const response = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`);
+        // Ha NEM írjuk oda a végére, hogy "/up", akkor csak lekérdezi
+        const response = await fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${API_KEY}`);
         
-        if (!response.ok) {
-            throw new Error("Hálózati hiba");
-        }
+        if (!response.ok) throw new Error("API Hiba");
+        
+        const data = await response.json();
+        displayEl.textContent = data.count;
+        
+    } catch (error) {
+        console.error("Számláló hiba:", error);
+        displayEl.textContent = "...";
+    }
+}
+
+// B. Növelés és Frissítés (Increment)
+async function incrementGenCount() {
+    const displayEl = document.getElementById("gen-count");
+    
+    // Opcionális: Pörgetés effektus vagy színváltás jelzi, hogy történt valami
+    if(displayEl) displayEl.style.color = "#ccc"; // Kicsit elhalványul amíg tölt
+
+    try {
+        // Az "/up" végződés növeli a számot
+        const response = await fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${API_KEY}/up`);
+        
+        if (!response.ok) throw new Error("API Hiba");
 
         const data = await response.json();
         
-        // Ennél a szolgáltatónál 'count' a mező neve (nem 'value')
-        counterElement.textContent = data.count;
-        
-        // Stílus frissítés
-        counterElement.style.color = "var(--color-primary)";
-        counterElement.style.fontWeight = "bold";
+        // Frissítjük a kijelzőt az új számmal
+        if (displayEl) {
+            displayEl.textContent = data.count;
+            displayEl.style.color = "var(--color-primary)"; // Vissza a szín
+            displayEl.style.fontWeight = "bold";
+            
+            // Egy kis animáció (megnő egy pillanatra)
+            displayEl.style.transition = "transform 0.2s";
+            displayEl.style.transform = "scale(1.5)";
+            setTimeout(() => displayEl.style.transform = "scale(1)", 200);
+        }
 
     } catch (error) {
-        console.error("Számláló hiba:", error);
-        // Ha hiba van, ne írja ki, hogy offline, hanem egy "fallback" értéket
-        // vagy csak hagyja üresen, hogy ne rontsa az összképet.
-        counterElement.textContent = "---"; 
+        console.error("Növelési hiba:", error);
     }
 }
