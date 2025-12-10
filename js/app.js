@@ -223,3 +223,44 @@ document.addEventListener("DOMContentLoaded", () => {
     btnPrintAll.addEventListener("click", handlePrintAllClick);
   }
 });
+
+// ======================
+// LÁTOGATÓ SZÁMLÁLÓ (CountAPI)
+// ======================
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateVisitorCount();
+});
+
+async function updateVisitorCount() {
+    const counterElement = document.getElementById("visit-count");
+    
+    // Csak akkor fusson, ha van ilyen elem az oldalon (pl. a footerben)
+    if (!counterElement) return;
+
+    // EGYEDI AZONOSÍTÓ:
+    // A "pivot-point-thesis-mark" helyére bármit írhatsz, de legyen egyedi!
+    // Ez alapján azonosítja a szerver a te számlálódat.
+    const namespace = "pivot-point-thesis-mark-2026"; 
+    const key = "visits";
+
+    try {
+        // 1. lépés: API hívás (megnöveli a számlálót 'hit' és visszaadja az új értéket)
+        // A 'countapi.xyz' egy ingyenes szolgáltatás.
+        const response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+        
+        // 2. lépés: Válasz feldolgozása JSON-ként
+        const data = await response.json();
+        
+        // 3. lépés: Kiírás az oldalra
+        counterElement.textContent = data.value;
+        
+        // (Opcionális) Animáció: Kicsit villanjon fel, amikor megérkezik
+        counterElement.style.color = "var(--color-primary)";
+        counterElement.style.fontWeight = "bold";
+
+    } catch (error) {
+        console.error("Hiba a számláló betöltésekor:", error);
+        counterElement.textContent = "(Offline)";
+    }
+}

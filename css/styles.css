@@ -1391,3 +1391,16 @@ input[type="number"] {
   transform: scale(1);
   background-color: white; /* Fehér pipa a barna háttéren */
 }
+
+/* LÁTOGATÓ SZÁMLÁLÓ */
+.visitor-counter {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  padding: 0.2rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  display: inline-block;
+  font-family: monospace; /* Hogy olyan "számlálós" legyen */
+}
