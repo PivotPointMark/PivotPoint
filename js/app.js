@@ -229,11 +229,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // ZH GENERÁLÁS SZÁMLÁLÓ (Kijelzéssel)
 // ======================
 
-// 1. Amikor az oldal betöltődik, kérjük le a JELENLEGI számot (növelés nélkül)
+// 1. Amikor az oldal betöltődik, kérjük le a JELENLEGI számot
 document.addEventListener("DOMContentLoaded", () => {
     fetchGenCount();
     
-    // Eseményfigyelő a generálás gombra (ha létezik az oldalon)
+    // Eseményfigyelő a generálás gombra
     const btnGenerate = document.getElementById("btn-generate-zh");
     if (btnGenerate) {
         btnGenerate.addEventListener("click", () => {
@@ -244,56 +244,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // KONFIGURÁCIÓ
 const API_NAMESPACE = "pivot-point-szakdolgozat-mark";
-const API_KEY = "zh_generated"; // Fontos: Ez ugyanaz a kulcs legyen!
+const API_KEY = "zh_generated"; 
 
-// A. Csak lekérdezés (Read-only)
+// A. Csak lekérdezés (Read-only) - JAVÍTOTT
 async function fetchGenCount() {
     const displayEl = document.getElementById("gen-count");
     if (!displayEl) return;
 
     try {
-        // Ha NEM írjuk oda a végére, hogy "/up", akkor csak lekérdezi
         const response = await fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${API_KEY}`);
         
+        // Ha 404-es hibát kapunk, az azt jelenti, hogy a számláló még nem létezik (0)
+        if (response.status === 404) {
+            displayEl.textContent = "0"; // Kiírjuk, hogy 0
+            return;
+        }
+
         if (!response.ok) throw new Error("API Hiba");
         
         const data = await response.json();
         displayEl.textContent = data.count;
         
     } catch (error) {
-        console.error("Számláló hiba:", error);
-        displayEl.textContent = "...";
+        console.error("Számláló lekérdezési hiba:", error);
+        // Hiba esetén (pl. reklámblokkoló) írjunk ki egy vonalat vagy 0-t
+        displayEl.textContent = "-"; 
     }
 }
 
-// B. Növelés és Frissítés (Increment)
+// B. Növelés és Frissítés (Increment) - JAVÍTOTT
 async function incrementGenCount() {
     const displayEl = document.getElementById("gen-count");
     
-    // Opcionális: Pörgetés effektus vagy színváltás jelzi, hogy történt valami
-    if(displayEl) displayEl.style.color = "#ccc"; // Kicsit elhalványul amíg tölt
+    if(displayEl) {
+        // Opcionális: amíg tölt, legyen halványabb
+        displayEl.style.opacity = "0.5"; 
+    }
 
     try {
-        // Az "/up" végződés növeli a számot
         const response = await fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${API_KEY}/up`);
         
         if (!response.ok) throw new Error("API Hiba");
 
         const data = await response.json();
         
-        // Frissítjük a kijelzőt az új számmal
+        // Frissítjük a kijelzőt
         if (displayEl) {
             displayEl.textContent = data.count;
-            displayEl.style.color = "var(--color-primary)"; // Vissza a szín
+            displayEl.style.opacity = "1"; // Vissza a normál nézet
+            displayEl.style.color = "var(--color-primary)";
             displayEl.style.fontWeight = "bold";
-            
-            // Egy kis animáció (megnő egy pillanatra)
-            displayEl.style.transition = "transform 0.2s";
-            displayEl.style.transform = "scale(1.5)";
-            setTimeout(() => displayEl.style.transform = "scale(1)", 200);
         }
 
     } catch (error) {
         console.error("Növelési hiba:", error);
+        if(displayEl) displayEl.style.opacity = "1"; // Hiba esetén is álljon vissza
     }
 }
