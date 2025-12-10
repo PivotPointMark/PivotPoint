@@ -226,14 +226,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ======================
-// ZH GENERÁLÁS SZÁMLÁLÓ (Kijelzéssel)
+// ZH GENERÁLÁS SZÁMLÁLÓ (Végleges, javított verzió)
 // ======================
 
-// 1. Amikor az oldal betöltődik, kérjük le a JELENLEGI számot
+// KONFIGURÁCIÓ (Legyen legfelül, hogy biztosan elérhető legyen)
+const API_NAMESPACE = "pivot-point-szakdolgozat-mark";
+const API_KEY = "zh_generated"; 
+
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. Azonnal lekérjük az adatot, amint betölt az oldal
     fetchGenCount();
     
-    // Eseményfigyelő a generálás gombra
+    // 2. Bekötjük a gombot
     const btnGenerate = document.getElementById("btn-generate-zh");
     if (btnGenerate) {
         btnGenerate.addEventListener("click", () => {
@@ -242,11 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// KONFIGURÁCIÓ
-const API_NAMESPACE = "pivot-point-szakdolgozat-mark";
-const API_KEY = "zh_generated"; 
-
-// A. Csak lekérdezés (Read-only) - JAVÍTOTT
+// A. Csak lekérdezés (Betöltéskor)
 async function fetchGenCount() {
     const displayEl = document.getElementById("gen-count");
     if (!displayEl) return;
@@ -254,50 +254,47 @@ async function fetchGenCount() {
     try {
         const response = await fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${API_KEY}`);
         
-        // Ha 404-es hibát kapunk, az azt jelenti, hogy a számláló még nem létezik (0)
+        // HA MÉG NEM LÉTEZIK A SZÁMLÁLÓ (404 hiba):
         if (response.status === 404) {
-            displayEl.textContent = "0"; // Kiírjuk, hogy 0
+            displayEl.textContent = "0"; // Még senki nem nyomta meg, tehát 0
             return;
         }
 
-        if (!response.ok) throw new Error("API Hiba");
+        if (!response.ok) throw new Error("Hálózati hiba");
         
         const data = await response.json();
-        displayEl.textContent = data.count;
+        displayEl.textContent = data.count; // SIKER: Kiírjuk a számot
         
     } catch (error) {
-        console.error("Számláló lekérdezési hiba:", error);
-        // Hiba esetén (pl. reklámblokkoló) írjunk ki egy vonalat vagy 0-t
-        displayEl.textContent = "-"; 
+        console.error("Számláló hiba (AdBlock?):", error);
+        // Ha blokkolva van, írjunk ki 0-t vagy egy kérdőjelet, ne vonalat
+        displayEl.textContent = "?"; 
     }
 }
 
-// B. Növelés és Frissítés (Increment) - JAVÍTOTT
+// B. Növelés (Gombnyomáskor)
 async function incrementGenCount() {
     const displayEl = document.getElementById("gen-count");
     
-    if(displayEl) {
-        // Opcionális: amíg tölt, legyen halványabb
-        displayEl.style.opacity = "0.5"; 
-    }
+    // Halványítás jelzi, hogy "dolgozunk"
+    if(displayEl) displayEl.style.opacity = "0.5";
 
     try {
         const response = await fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${API_KEY}/up`);
         
-        if (!response.ok) throw new Error("API Hiba");
+        if (!response.ok) throw new Error("Hálózati hiba");
 
         const data = await response.json();
         
-        // Frissítjük a kijelzőt
         if (displayEl) {
             displayEl.textContent = data.count;
-            displayEl.style.opacity = "1"; // Vissza a normál nézet
+            displayEl.style.opacity = "1";
             displayEl.style.color = "var(--color-primary)";
             displayEl.style.fontWeight = "bold";
         }
 
     } catch (error) {
         console.error("Növelési hiba:", error);
-        if(displayEl) displayEl.style.opacity = "1"; // Hiba esetén is álljon vissza
+        if(displayEl) displayEl.style.opacity = "1";
     }
 }
