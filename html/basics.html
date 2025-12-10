@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alapok – Pivot Point</title>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  
+  <header>
+    <div class="nav-container">
+      <a href="html/index.html" class="logo logo-link" aria-label="Vissza a főoldalra">
+        <div class="logo-badge">P</div>
+        <div>Pivot Point</div>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="section-card">
+        <h1 class="section-title">Lineáris Algebra Alapok</h1>
+        
+        <p class="section-lead">
+          Mielőtt belevágnál a bonyolultabb műveletekbe (mint a pivotálás vagy inverz számítás), 
+          fontos tisztázni az alapfogalmakat. Mi az a mátrix? Hogyan jelöljük? 
+          Milyen speciális típusok léteznek?
+        </p>
+
+        <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
+
+        <div class="theory-content" style="max-width: 800px; margin: 0 auto; line-height: 1.8; color: #4a3b32;">
+          
+          <h3 style="color:var(--color-primary); margin-top:1.5rem; margin-bottom: 0.5rem;">1. Mátrix definíciója</h3>
+          <p>
+            A mátrix egy számokból álló téglalap alakú táblázat. A számokat a mátrix <strong>elemeinek</strong> nevezzük.
+            Egy $m \times n$-es mátrixnak $m$ darab sora és $n$ darab oszlopa van.
+          </p>
+          <p>
+            Általános jelölése:
+            $$
+            A = \begin{pmatrix}
+            a_{11} & a_{12} & \cdots & a_{1n} \\
+            a_{21} & a_{22} & \cdots & a_{2n} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            a_{m1} & a_{m2} & \cdots & a_{mn}
+            \end{pmatrix}
+            $$
+            Ahol $a_{ij}$ az $i$-edik sor és $j$-edik oszlop metszéspontjában álló elem.
+          </p>
+
+          <h3 style="color:var(--color-primary); margin-top:2.5rem; margin-bottom: 0.5rem;">2. Speciális mátrixok</h3>
+          <ul style="list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>
+              <strong>Négyzetes mátrix:</strong> Ahol a sorok és oszlopok száma megegyezik ($n = m$, azaz $n \times n$).
+            </li>
+            <li>
+              <strong>Egységmátrix ($I$ vagy $E$):</strong> Olyan négyzetes mátrix, amelynek főátlójában (bal felső saroktól a jobb alsóig) csupa <strong>1</strong>-es, mindenhol máshol <strong>0</strong> áll.
+              $$ I_3 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} $$
+            </li>
+            <li>
+              <strong>Zérómátrix ($0$):</strong> Minden eleme 0.
+            </li>
+            <li>
+              <strong>Háromszögmátrix:</strong>
+              <ul>
+                <li><em>Felső háromszögmátrix:</em> A főátló alatt csupa 0 áll.</li>
+                <li><em>Alsó háromszögmátrix:</em> A főátló felett csupa 0 áll.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h3 style="color:var(--color-primary); margin-top:2.5rem; margin-bottom: 0.5rem;">3. Elemi sorműveletek</h3>
+          <p>
+            A Gauss-elimináció (és a Pivot Point alkalmazás) során háromféle "megengedett" műveletet végezhetünk a mátrix sorain.
+            Ezeket elemi átalakításoknak hívjuk, mert <strong>nem változtatják meg</strong> az egyenletrendszer megoldáshalmazát,
+            sem a mátrix rangját.
+          </p>
+          <ol style="margin-left: 1.5rem; margin-top: 1rem;">
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Sorcsere:</strong> Két tetszőleges sor felcserélése ($S_i \leftrightarrow S_j$).
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Skalárral szorzás:</strong> Egy sor minden elemének megszorzása egy nem nulla számmal ($S_i \leftarrow c \cdot S_i$).
+              <br><small style="color:#7b6454;">(Ezt használjuk a főátló 1-esre hozásához, pl. osztás a pivot elemmel.)</small>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Sor hozzáadása:</strong> Egy sorhoz hozzáadni egy másik sor tetszőleges számszorosát ($S_i \leftarrow S_i + c \cdot S_j$).
+              <br><small style="color:#7b6454;">(Ezt használjuk a kinullázáshoz, azaz az eliminációhoz.)</small>
+            </li>
+          </ol>
+
+          <div style="margin-top: 4rem; text-align: center;">
+            <p style="margin-bottom: 1rem;">Most, hogy ismered az alapokat, vágj bele a gyakorlásba!</p>
+            <a href="html/index.html" class="btn-main btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+              Vissza a menübe
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <span>© 2026 Pivot Point</span>
+    </div>
+  </footer>
+
+</body>
+</html>
