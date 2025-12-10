@@ -759,6 +759,25 @@ body.solutions-visible .zh-solution {
 ========================= */
 
 @media print {
+
+  /* 1. FIZIKAI PAPÍRMARGÓ BEÁLLÍTÁSA */
+  
+  /* Általános beállítás minden oldalra (pl. 2., 3. oldal) */
+  @page {
+    margin: 20mm; 
+  }
+
+  /* KIVÉTEL: Az első oldal */
+  @page :first {
+    /* Itt kisebbre vesszük a felső margót, hogy feljebb csússzon a fejléc */
+    margin-top: -5mm; 
+    
+    /* A többi margó maradhat normális */
+    margin-bottom: 20mm;
+    margin-left: 20mm;
+    margin-right: 20mm;
+  }
+
   /* Fekete–fehér, fehér háttér */
   body {
     background: #ffffff !important;
@@ -879,6 +898,13 @@ body.solutions-visible .zh-solution {
 
   body.print-mode-all .zh-pair:last-child {
     page-break-after: auto;
+  }
+
+  /* Eltünteti a szaggatott vonalat a feladatok közül nyomtatásban */
+  .zh-pair + .zh-pair {
+    border-top: none !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 }
 
