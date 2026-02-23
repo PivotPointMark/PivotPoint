@@ -2,49 +2,81 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Determináns – Pivot Point</title>
-  <script>window.MathJax = { tex: { inlineMath: [['$', '$']] }, svg: { fontCache: 'global' } };</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pivot Point - Determináns (Kifejtés)</title>
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
   <link rel="stylesheet" href="css/styles.css" />
+
+  <style>
+    .matrix-grid { display: grid; gap: 10px; margin: 2rem auto; max-width: fit-content; }
+    .matrix-cell { width: 60px; height: 60px; text-align: center; font-size: 1.2rem; border: 2px solid var(--color-bg-dark); border-radius: 8px; background: white; }
+    .hidden { display: none; }
+    .action-buttons { margin-top: 1.5rem; display: flex; gap: 10px; justify-content: center; }
+    .step-card { background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; border-left: 5px solid var(--color-primary); box-shadow: var(--shadow-soft); }
+  </style>
 </head>
+
 <body>
-  
   <header>
     <div class="nav-container">
-      <a href="index.html" class="logo logo-link">
+      <a href="index.html" class="logo logo-link" aria-label="Vissza a főoldalra">
         <div class="logo-badge">P</div>
         <div>Pivot Point</div>
       </a>
+      
+      <div class="nav-links-wrapper">
+        <a href="index.html" class="btn-nav-primary" style="text-decoration: none; display: inline-block;">
+          Vissza a kezdőlapra
+        </a>
+      </div>
     </div>
   </header>
 
   <main>
     <section class="section">
       <div class="section-card">
-        <h1 class="section-title">Determináns Számítás</h1>
-        
-        <p class="section-lead">
-          Lorem ipsum dolor sit amet. A determináns egy négyzetes mátrixhoz rendelt szám. 
-          Kiszámolható a Sarrus-szabállyal (3x3 esetén) vagy a kifejtési tétellel.
-        </p>
-        <p style="margin-bottom: 2rem; color: #6b5241;">
-          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-          Excepteur sint occaecat cupidatat non proident.
-        </p>
+        <h1 class="section-title">Determináns: Kifejtési Módszer</h1>
+        <p class="section-lead">Számítás az első sor szerinti kifejtéssel (sakktábla-szabály), és minden részeredmény teljes levezetéssel.</p>
 
-        <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
-
-        <div id="determinant-app-container">
-          <div style="padding: 3rem; text-align: center; background: #fdf7ef; border-radius: 12px; border: 1px dashed #dcbfa8; color: #8a715e;">
-            Itt jelenik meg majd a Determináns alkalmazás felülete.
+        <div id="determinant-app-container" class="app-container">
+          <div class="control-panel">
+            <div class="field-group field-group-inline">
+              <label class="field-label">Méret (n×n)</label>
+              <input type="number" id="matrix-size" value="3" min="2" max="4" class="input-sm" />
+            </div>
+            <button id="btn-create-grid" class="btn-main btn-primary">Létrehozás</button>
           </div>
-        </div>
 
+          <div id="matrix-input-wrapper" class="matrix-input-wrapper hidden">
+            <div id="matrix-grid" class="matrix-grid"></div>
+
+            <div class="action-buttons">
+              <button id="btn-fill-random" class="btn-main btn-secondary">Véletlen</button>
+              <button id="btn-calc-det" class="btn-main btn-primary">Kiszámítás (Kifejtéssel)</button>
+            </div>
+          </div>
+
+          <div id="matrix-display-area" class="matrix-display-area hidden" style="margin-top: 2rem;">
+            <div id="calc-steps"></div>
+
+            <div class="generation-result" style="margin-top: 2rem; background: var(--color-primary); color: white; padding: 1.5rem; border-radius: 12px;">
+              Végeredmény: $\det(A) = $ <strong id="final-result"></strong>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
   </main>
 
-  <script src="js/tasks.js"></script>
+  <script src="js/determinant.js"></script>
 </body>
 </html>
