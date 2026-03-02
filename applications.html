@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mire jó a Lineáris Algebra? – Pivot Point</title>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .app-item {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(123, 74, 45, 0.1);
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.3s ease;
+    }
+    .app-item:hover {
+      transform: translateY(-5px);
+    }
+    .app-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .app-title {
+      color: var(--color-primary);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+    }
+    .theory-box {
+      background: var(--color-bg-dark);
+      color: #2a1b12;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      border-left: 4px solid var(--color-primary);
+    }
+  </style>
+</head>
+<body>
+  
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo logo-link">
+        <div class="logo-badge">P</div>
+        <div>Pivot Point</div>
+      </a>
+      <div class="nav-links-wrapper">
+        <a href="index.html" class="btn-nav-primary">Vissza a kezdőlapra</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="section-card section-card-light">
+        <h1 class="section-title">Mire jó a Lineáris Algebra a valóságban?</h1>
+        <p class="section-lead">
+          A lineáris algebra nem csak száraz egyenletekből áll. Ez a tudományág a modern technológia 
+          láthatatlan motorja, a videojátékoktól kezdve a mesterséges intelligenciáig.
+        </p>
+
+        <div class="app-grid">
+          
+          <article class="app-item">
+            <span class="app-icon">🎮</span>
+            <h3 class="app-title">Videojátékok és 3D Grafika</h3>
+            <p>Minden elmozdulás, forgatás vagy kameraváltás egy 3D-s térben valójában <strong>mátrixszorzás</strong>.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> A koordinátákat vektorokként kezeljük, amiket transzformációs mátrixokkal szorzunk meg a mozgáshoz.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">📸</span>
+            <h3 class="app-title">Képfeldolgozás és Instagram filterek</h3>
+            <p>Egy digitális fotó valójában egy óriási mátrix, ahol minden cella egy pixel színét jelöli.</p>
+            
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> A szűrők alkalmazásakor a kép-mátrix minden elemén matematikai műveleteket hajtunk végre.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">🔍</span>
+            <h3 class="app-title">Google Keresőmotor</h3>
+            <p>A Google sikerét hozó algoritmus a weboldalak fontosságát a mátrixok <strong>sajátértékei</strong> alapján számolja ki.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> Az internetet egy hatalmas szomszédsági mátrixként modellezik.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">🤖</span>
+            <h3 class="app-title">Mesterséges Intelligencia</h3>
+            <p>A ChatGPT vagy az arcfelismerők adatok milliárdjait dolgozzák fel vektorokba rendezve.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> A neuronhálók tanítása során mátrix-műveletek sorozatával optimalizálják a súlyokat.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">📍</span>
+            <h3 class="app-title">GPS Navigáció</h3>
+            <p>A telefonod helyzetének meghatározásához a műholdak jeleiből <strong>lineáris egyenletrendszereket</strong> kell megoldani.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> Legalább 4 műhold jele kell a pontos 3D koordináták kiszámításához.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">🔐</span>
+            <h3 class="app-title">Titkosítás (Kriptográfia)</h3>
+            <p>Bizonyos titkosítási algoritmusok mátrixok invertálhatóságán alapulnak.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> Hill-kódolás során a szöveget mátrixszal szorozzuk (kódolás), majd az inverzével (dekódolás).
+            </div>
+          </article>
+
+        </div>
+
+        <div style="margin-top: 4rem; text-align: center;">
+          <p style="margin-bottom: 1rem; font-weight: 600;">Szeretnél te is ezekkel foglalkozni? Kezdd a gyakorlást!</p>
+          <a href="pivot.html" class="btn-main btn-primary" style="padding: 1rem 2rem;">Vágjunk bele a számításokba!</a>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <span>© 2026 Pivot Point – Oktatási projekt</span>
+    </div>
+  </footer>
+
+</body>
+</html>

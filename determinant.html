@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pivot Point - Determináns (Kifejtés)</title>
+  <title>Pivot Point - Determináns</title>
 
   <script>
     window.MathJax = {
@@ -16,11 +16,48 @@
   <link rel="stylesheet" href="css/styles.css" />
 
   <style>
-    .matrix-grid { display: grid; gap: 10px; margin: 2rem auto; max-width: fit-content; }
-    .matrix-cell { width: 60px; height: 60px; text-align: center; font-size: 1.2rem; border: 2px solid var(--color-bg-dark); border-radius: 8px; background: white; }
-    .hidden { display: none; }
-    .action-buttons { margin-top: 1.5rem; display: flex; gap: 10px; justify-content: center; }
-    .step-card { background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; border-left: 5px solid var(--color-primary); box-shadow: var(--shadow-soft); }
+    .matrix-grid {
+      display: grid;
+      gap: 10px;
+      margin: 2rem auto;
+      max-width: fit-content;
+    }
+
+    .matrix-cell {
+      width: 60px;
+      height: 60px;
+      text-align: center;
+      font-size: 1.2rem;
+      border: 2px solid var(--color-bg-dark);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .action-buttons {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .step-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border-left: 5px solid var(--color-primary);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .step-card-dark {
+      background: var(--color-bg-dark);
+      color: white;
+    }
   </style>
 </head>
 
@@ -31,7 +68,7 @@
         <div class="logo-badge">P</div>
         <div>Pivot Point</div>
       </a>
-      
+
       <div class="nav-links-wrapper">
         <a href="index.html" class="btn-nav-primary" style="text-decoration: none; display: inline-block;">
           Vissza a kezdőlapra
@@ -43,8 +80,11 @@
   <main>
     <section class="section">
       <div class="section-card">
-        <h1 class="section-title">Determináns: Kifejtési Módszer</h1>
-        <p class="section-lead">Számítás az első sor szerinti kifejtéssel (sakktábla-szabály), és minden részeredmény teljes levezetéssel.</p>
+        <h1 class="section-title">Determináns számítás</h1>
+        <p class="section-lead">
+          Itt kétféleképpen számolhatod ki a determinánst:
+          kifejtéssel vagy pivotálással.
+        </p>
 
         <div id="determinant-app-container" class="app-container">
           <div class="control-panel">
@@ -60,7 +100,8 @@
 
             <div class="action-buttons">
               <button id="btn-fill-random" class="btn-main btn-secondary">Véletlen</button>
-              <button id="btn-calc-det" class="btn-main btn-primary">Kiszámítás (Kifejtéssel)</button>
+              <button id="btn-calc-det" class="btn-main btn-secondary">Kiszámítás kifejtéssel</button>
+              <button id="btn-calc-det-pivot" class="btn-main btn-primary">Kiszámítás pivotálással</button>
             </div>
           </div>
 
@@ -68,10 +109,12 @@
             <div id="calc-steps"></div>
 
             <div class="generation-result" style="margin-top: 2rem; background: var(--color-primary); color: white; padding: 1.5rem; border-radius: 12px;">
+              <div style="margin-bottom: 0.5rem;">
+                Módszer: <strong id="result-method"></strong>
+              </div>
               Végeredmény: $\det(A) = $ <strong id="final-result"></strong>
             </div>
           </div>
-
         </div>
       </div>
     </section>
