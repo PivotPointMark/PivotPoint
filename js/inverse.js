@@ -1,11 +1,6 @@
 // ======================
 // INVERSE.JS – Gauss-Jordan Invertálás Fix Oszlopfeliratokkal
-// MÓDOSÍTVA a kért UI-logikára:
-// - "Kiválasztott lépés végrehajtása" gomb CSAK akkor látszik, ha van kiválasztott pivot
-// - ha nincs kiválasztás: se gomb, se "következő lépés" jellegű üzenet
-// - rendezés utáni/végi üzenet: csak "A sorok rendezve lettek."
-// - NINCS "bal oldali mátrix" szövegezés
-// - automatikusan felkínálja a rendezést (gomb), ha a sorcímkék már (a_i) halmazt adják, de rossz sorrendben
+// ÚJ FUNKCIÓ: "Ellenőrzés" gomb hozzáadva, ami levezeti az A * A^-1 = I szorzást.
 // ======================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -27,8 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const stepTitle = document.getElementById("step-title");
 
-    // --- Dinamikus gomb: "Egységmátrixra hozás" (sorok rendezése) ---
-    // Nem kell HTML-t módosítanod: itt létrehozzuk és beszúrjuk a btnStep mellé.
+    // --- Dinamikus gomb: "Egységmátrixra hozás" ---
     const btnFinalizeIdentity = document.createElement("button");
     btnFinalizeIdentity.id = "btn-finalize-identity";
     btnFinalizeIdentity.className = "btn-main btn-secondary hidden";
@@ -36,7 +30,16 @@ document.addEventListener("DOMContentLoaded", () => {
     btnFinalizeIdentity.textContent = "Egységmátrixra hozás";
     stepControls.appendChild(btnFinalizeIdentity);
 
+    // --- ÚJ Dinamikus gomb: "Ellenőrzés" ---
+    const btnVerify = document.createElement("button");
+    btnVerify.id = "btn-verify";
+    btnVerify.className = "btn-main btn-primary hidden";
+    btnVerify.style.marginLeft = "0.5rem";
+    btnVerify.textContent = "Ellenőrzés (A · A⁻¹)";
+    stepControls.appendChild(btnVerify);
+
     // ÁLLAPOT
+    let originalMatrixA = []; // Eltároljuk az eredeti mátrixot az ellenőrzéshez
     let currentMatrixA = [];
     let currentMatrixI = [];
     let matrixSize = 0;
@@ -89,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stepControls.classList.add("hidden");
         btnStep.classList.add("hidden");
         btnFinalizeIdentity.classList.add("hidden");
+        btnVerify.classList.add("hidden");
         pivotInfo.innerHTML = "";
     }
 
@@ -96,11 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
         stepControls.classList.remove("hidden");
         btnStep.classList.remove("hidden");
         btnFinalizeIdentity.classList.add("hidden");
+        btnVerify.classList.add("hidden");
     }
 
     function showFinalizeControls(messageHtml) {
         stepControls.classList.remove("hidden");
         btnStep.classList.add("hidden");
+        btnVerify.classList.add("hidden");
         btnFinalizeIdentity.classList.remove("hidden");
         pivotInfo.innerHTML = messageHtml || "";
         refreshMath(pivotInfo);
@@ -133,7 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Ha van pivot kijelölés, akkor a lépés gomb látszik, különben semmi.
         if (selectedPivot) showPivotControls();
         else hideAllControls();
     }
@@ -171,13 +176,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const newA = currentMatrixA.map(row => row.slice());
         const newI = currentMatrixI.map(row => row.slice());
 
-        // pivot sor normálása
         for (let j = 0; j < n; j++) {
             newA[pRow][j] /= pivotVal;
             newI[pRow][j] /= pivotVal;
         }
 
-        // oszlop kinullázás
         for (let i = 0; i < n; i++) {
             if (i !== pRow) {
                 const factor = currentMatrixA[i][pCol];
@@ -225,11 +228,13 @@ document.addEventListener("DOMContentLoaded", () => {
         stepCount++;
         appendNewStep(currentMatrixA, currentMatrixI, stepCount);
 
-        // Végi üzenet (nincs "bal oldal")
+        // Végi üzenet és az ellenőrzés gomb megjelenítése
         stepControls.classList.remove("hidden");
         btnStep.classList.add("hidden");
         btnFinalizeIdentity.classList.add("hidden");
-        pivotInfo.innerHTML = "A sorok rendezve lettek.";
+        btnVerify.classList.remove("hidden"); // Ellenőrzés gomb aktív
+
+        pivotInfo.innerHTML = "A sorok rendezve lettek. Most ellenőrizheted az eredményt mátrixszorzással.";
         refreshMath(pivotInfo);
 
         if (stepTitle) stepTitle.textContent = "Kész";
@@ -244,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const thead = document.createElement("thead");
         const headerRow = document.createElement("tr");
 
-        headerRow.appendChild(document.createElement("th")); // üres sarok
+        headerRow.appendChild(document.createElement("th"));
 
         headers.forEach(h => {
             const th = document.createElement("th");
@@ -311,10 +316,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const augmentedWrapper = document.createElement("div");
         augmentedWrapper.className = "augmented-matrix-wrapper active-wrapper";
 
-        // Bal tábla: A (fix oszlopcímkék a1..an)
         const tableA = createMatrixTable(matA, true, colLabels, true, "left");
 
-        // Jobb tábla: I (fix e1..en oszlopcímkék)
         const eHeaders = Array.from({ length: matrixSize }, (_, i) => `e_{${i + 1}}`);
         const tableI = createMatrixTable(matI, false, eHeaders, false, "right");
 
@@ -398,11 +401,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Eltesszük az eredeti A mátrixot az ellenőrzéshez
+        originalMatrixA = currentMatrixA.map(row => row.slice());
+
         currentMatrixI = Array.from({ length: matrixSize }, (_, i) =>
             Array.from({ length: matrixSize }, (_, j) => (i === j ? 1 : 0))
         );
 
-        // Címkék
         rowLabels = Array.from({ length: matrixSize }, (_, i) => `e_{${i + 1}}`);
         colLabels = Array.from({ length: matrixSize }, (_, i) => `a_{${i + 1}}`);
 
@@ -423,11 +428,10 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshMath(stepTitle);
     });
 
-    // 3. Lépés végrehajtása (CSAK kijelölt pivot esetén)
+    // 3. Lépés végrehajtása
     btnStep.addEventListener("click", () => {
         if (!selectedPivot) return;
 
-        // sorcímke frissítése
         rowLabels[selectedPivot.row] = colLabels[selectedPivot.col];
 
         freezeLastTable();
@@ -437,12 +441,81 @@ document.addEventListener("DOMContentLoaded", () => {
         stepCount++;
         appendNewStep(currentMatrixA, currentMatrixI, stepCount);
 
-        // kijelölés megszűnt -> csak akkor látszanak gombok, ha kell (rendezés) / vagy új kijelölés történik
         updateFinalizeButtonVisibility();
     });
 
     // 4. Sorok egységmátrix szerinti rendezése
     btnFinalizeIdentity.addEventListener("click", () => {
         reorderRowsToIdentity();
+    });
+
+    // 5. ÚJ FUNKCIÓ: Ellenőrzés levezetése (A * A^-1)
+    btnVerify.addEventListener("click", () => {
+        btnVerify.classList.add("hidden"); // Elrejtjük a gombot
+        pivotInfo.innerHTML = "Sikeres ellenőrzés: $A \\cdot A^{-1} = I$";
+        refreshMath(pivotInfo);
+
+        const verifyWrapper = document.createElement("div");
+        verifyWrapper.className = "step-block";
+        verifyWrapper.style.textAlign = "left";
+        verifyWrapper.style.marginTop = "2rem";
+        verifyWrapper.style.padding = "1rem";
+        verifyWrapper.style.backgroundColor = "rgba(123, 74, 45, 0.05)";
+        verifyWrapper.style.borderRadius = "8px";
+
+        const title = document.createElement("h4");
+        title.style.color = "#7b4a2d";
+        title.textContent = "Mátrixszorzás levezetése elemenként ($A \\cdot A^{-1}$):";
+        verifyWrapper.appendChild(title);
+
+        const n = matrixSize;
+        let latexString = "$$\\begin{aligned}\n";
+
+        // Végigmegyünk az eredeti A mátrix sorain (i) és az Inverz mátrix oszlopain (j)
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let terms = [];
+                let sum = 0;
+                
+                // Szorzatösszeg számítása (k)
+                for (let k = 0; k < n; k++) {
+                    const valA = originalMatrixA[i][k];
+                    const valInv = currentMatrixI[k][j];
+                    
+                    // Itt látszik, hogy a gép valójában végrehajtja a számítást!
+                    sum += (valA * valInv);
+
+                    const fracA = toFraction(valA);
+                    const fracInv = toFraction(valInv);
+
+                    // Zárójelezzük a negatív értékeket a tiszta LaTeX szintaktika érdekében
+                    const strA = fracA.startsWith('-') ? `(${fracA})` : fracA;
+                    const strInv = fracInv.startsWith('-') ? `(${fracInv})` : fracInv;
+
+                    terms.push(`${strA} \\cdot ${strInv}`);
+                }
+                
+                // Végeredmény kerekítése a lebegőpontos pontatlanságok miatt, majd törtté alakítása
+                const finalSumFrac = toFraction(Math.round(sum * 1e9) / 1e9);
+                latexString += `c_{${i+1},${j+1}} &= ${terms.join(" + ")} = ${finalSumFrac} \\\\\n`;
+            }
+            // Üres sorköz a sorok (i) között a jobb olvashatóságért
+            if (i < n - 1) {
+                latexString += `\\\\[1.5ex]\n`;
+            }
+        }
+        latexString += "\\end{aligned}$$";
+
+        const mathDiv = document.createElement("div");
+        mathDiv.innerHTML = latexString;
+        verifyWrapper.appendChild(mathDiv);
+
+        latexOutput.appendChild(verifyWrapper);
+        refreshMath(verifyWrapper);
+        
+        // Automatikus legörgetés az ellenőrzéshez
+        setTimeout(() => {
+            verifyWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
     });
 });

@@ -4757,7 +4757,6 @@ index.html
             <li><a href="#celunk">Célunk</a></li>
             <li><a href="#miert">Miért LinAlg?</a></li>
             <li><a href="#otos">5-ösre készülök</a></li>
-            <li><a href="#zh-generator">ZH generátor</a></li>
             <li>
               <button
                 class="btn-nav-primary"
