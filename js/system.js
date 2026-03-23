@@ -1,10 +1,13 @@
 // ======================
 // SYSTEM.JS – Általános lineáris egyenletrendszer megoldó (Gauss-Jordan / RREF)
 // Kezel: m x n mátrixokat is, pl. 2x5, 3x6
-// JAVÍTVA:
-// - korábban ismerje fel a kész állapotot
-// - ha már megvan a maximális pivotszám és marad szabad változó,
-//   akkor írja ki a végtelen sok megoldást
+// MÓDOSÍTVA:
+// - e1, e2, ... bázisváltozók megjelenítése
+// - a1, a2, ... oszlopváltozók megjelenítése
+// - pivot után a bázis automatikusan frissül
+// - a végső megoldásban x helyett a szerepel
+// - nincs "Bázis" felirat bal fent
+// - a b oszlop előtt nincsenek sorfeliratok
 // ======================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnStep = document.getElementById("btn-perform-step");
     const stepTitle = document.getElementById("step-title");
     const systemWarning = document.getElementById("system-warning");
+    const basisInfo = document.getElementById("basis-info");
 
     // ÁLLAPOT
     let currentMatrixA = []; // m x n
@@ -34,6 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let colCount = 0;
     let selectedPivot = null;
     let stepCount = 0;
+
+    // Jelölések
+    let rowLabels = []; // aktuális bázis: kezdetben e_i, később egy részük a_j
+    let colLabels = []; // a_1, a_2, ...
 
     // 1. Mátrix keret létrehozása
     btnCreate.addEventListener("click", () => {
@@ -49,6 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
         colCount = n;
         stepCount = 0;
         selectedPivot = null;
+
+        rowLabels = Array.from({ length: m }, (_, i) => `e_${i + 1}`);
+        colLabels = Array.from({ length: n }, (_, i) => `a_${i + 1}`);
 
         gridContainer.innerHTML = "";
         gridContainer.style.gridTemplateColumns = `repeat(${n + 1}, 1fr)`;
@@ -79,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
         systemWarning.classList.add("hidden");
         systemWarning.innerHTML = "";
         latexOutput.innerHTML = "";
+        basisInfo.innerHTML = "";
     });
 
     // 2. Véletlen kitöltés – mindig konzisztens rendszert készít
@@ -102,12 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        const x = Array.from({ length: n }, () => randomInt(-5, 5));
+        const solutionVector = Array.from({ length: n }, () => randomInt(-5, 5));
 
         const b = Array.from({ length: m }, (_, r) => {
             let sum = 0;
             for (let c = 0; c < n; c++) {
-                sum += A[r][c] * x[c];
+                sum += A[r][c] * solutionVector[c];
             }
             return sum;
         });
@@ -154,6 +166,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        rowLabels = Array.from({ length: rowCount }, (_, i) => `e_${i + 1}`);
+        colLabels = Array.from({ length: colCount }, (_, i) => `a_${i + 1}`);
+
         stepCount = 0;
         selectedPivot = null;
         latexOutput.innerHTML = "";
@@ -161,6 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stepTitle.style.display = "none";
         stepControls.classList.add("hidden");
 
+        updateBasisInfo();
         updateSystemWarning();
         appendNewStep(currentMatrixA, currentVectorB, stepCount);
     });
@@ -169,6 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
     btnStep.addEventListener("click", () => {
         if (!selectedPivot) return;
 
+        // A kiválasztott sor bázisváltozója lecserélődik a kiválasztott oszlop változójára
+        rowLabels[selectedPivot.row] = colLabels[selectedPivot.col];
+
         freezeLastTable();
         performGaussJordanStep(selectedPivot.row, selectedPivot.col);
 
@@ -176,9 +195,32 @@ document.addEventListener("DOMContentLoaded", () => {
         stepControls.classList.add("hidden");
         stepCount++;
 
+        updateBasisInfo();
         updateSystemWarning();
         appendNewStep(currentMatrixA, currentVectorB, stepCount);
     });
+
+    function updateBasisInfo() {
+        if (!basisInfo) return;
+
+        const basisSet = new Set(rowLabels.map(normalizeLabel));
+        const nonBasis = colLabels.filter(label => !basisSet.has(normalizeLabel(label)));
+
+        basisInfo.innerHTML = `
+            <div style="margin-bottom:0.45rem;">
+                <strong>Aktuális bázis:</strong>
+                ${rowLabels.map(l => `$${l}$`).join(", ")}
+            </div>
+            <div>
+                <strong>Nem bázisváltozók:</strong>
+                ${nonBasis.length ? nonBasis.map(l => `$${l}$`).join(", ") : "—"}
+            </div>
+        `;
+
+        if (window.MathJax) {
+            MathJax.typesetPromise([basisInfo]).catch(() => {});
+        }
+    }
 
     function appendNewStep(matA, vecB, count) {
         if (count > 0) {
@@ -200,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
         label.style.marginBottom = "0.5rem";
 
         if (count === 0) {
-            label.textContent = "Kiindulás: [ A | b ] (Válassz pivotot az A részben!)";
+            label.innerHTML = "Kiindulás: \\([A \\mid b]\\) (Válassz pivotot az \\(A\\) részben!)";
         } else {
             label.textContent = `${count}. lépés eredménye`;
         }
@@ -208,10 +250,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const augmentedWrapper = document.createElement("div");
         augmentedWrapper.className = "augmented-matrix-wrapper active-wrapper";
 
-        const tableA = createMatrixTable(matA, true);
+        const tableA = createMatrixTable(matA, true, "A");
         tableA.classList.add("matrix-left");
 
-        const tableB = createMatrixTable(vecB, false);
+        const tableB = createMatrixTable(vecB, false, "b");
         tableB.classList.add("matrix-right");
 
         augmentedWrapper.appendChild(tableA);
@@ -236,15 +278,57 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function createMatrixTable(matrixData, isInteractive) {
+    function createMatrixTable(matrixData, isInteractive, type) {
         const table = document.createElement("table");
         table.className = "interactive-matrix";
 
         const rows = matrixData.length;
         const cols = matrixData[0].length;
 
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+
+        const corner = document.createElement("th");
+        corner.innerHTML = "";
+        corner.style.padding = "8px 10px";
+        headerRow.appendChild(corner);
+
+        if (type === "A") {
+            for (let c = 0; c < cols; c++) {
+                const th = document.createElement("th");
+                th.innerHTML = `$${colLabels[c]}$`;
+                th.style.padding = "8px 12px";
+                th.style.color = "#7b4a2d";
+                headerRow.appendChild(th);
+            }
+        } else {
+            const th = document.createElement("th");
+            th.innerHTML = "$b$";
+            th.style.padding = "8px 12px";
+            th.style.color = "#7b4a2d";
+            headerRow.appendChild(th);
+        }
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
         for (let r = 0; r < rows; r++) {
             const tr = document.createElement("tr");
+
+            const rowHeader = document.createElement("th");
+
+            if (type === "A") {
+                rowHeader.innerHTML = `$${rowLabels[r]}$`;
+                rowHeader.style.color = "#7b4a2d";
+                rowHeader.style.fontWeight = "700";
+            } else {
+                rowHeader.innerHTML = "";
+            }
+
+            rowHeader.style.padding = "8px 12px";
+            tr.appendChild(rowHeader);
 
             for (let c = 0; c < cols; c++) {
                 const td = document.createElement("td");
@@ -264,14 +348,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     td.style.backgroundColor = "#faf5f0";
                     td.style.fontWeight = "bold";
                     td.style.color = "#5f4939";
+                    td.style.cursor = "default";
                 }
 
                 tr.appendChild(td);
             }
 
-            table.appendChild(tr);
+            tbody.appendChild(tr);
         }
 
+        table.appendChild(tbody);
         return table;
     }
 
@@ -302,8 +388,13 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedPivot = { row: r, col: c, value: val };
 
         pivotInfo.innerHTML =
-            `Választott pivot: <span style="color:var(--color-primary); font-size:1.2em;">${formatAsFraction(val)}</span>`;
+            `Választott pivot: <span style="color:var(--color-primary); font-size:1.1em;">$${rowLabels[r]} \\leftrightarrow ${colLabels[c]}$</span> &nbsp; (érték: <strong>${formatAsFraction(val)}</strong>)`;
+
         stepControls.classList.remove("hidden");
+
+        if (window.MathJax) {
+            MathJax.typesetPromise([pivotInfo]).catch(() => {});
+        }
     }
 
     function performGaussJordanStep(pRow, pCol) {
@@ -351,7 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
         currentVectorB = newB;
     }
 
-    // ----------- Lényeg: mikor tekintsük késznek? -----------
     function getEndState(matA, vecB) {
         const classification = classifySystem(matA, vecB);
 
@@ -371,9 +461,6 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         }
 
-        // Ha már annyi pivot van, amennyi maximálisan lehet,
-        // és marad szabad változó, akkor biztosan végtelen sok megoldás van.
-        // Példa: 3x6 esetén 3 pivot után kész.
         const maxPossiblePivots = Math.min(rowCount, colCount);
 
         if (
@@ -396,7 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isReadableForParametricSolution(matA, classification) {
-        // A paraméteres kiíráshoz elég, ha minden pivot oszlop egységoszlop.
         for (const pCol of classification.pivotColumns) {
             const pRow = classification.pivotRowByCol[pCol];
             if (pRow === undefined) return false;
@@ -434,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let c = 0; c < colCount; c++) {
                 const pivotRow = classification.pivotRowByCol[c];
                 const val = currentVectorB[pivotRow][0];
-                latexStr += `x_{${c + 1}} &= ${toLatexNumber(val)} \\\\\n`;
+                latexStr += `a_{${c + 1}} &= ${toLatexNumber(val)} \\\\\n`;
             }
 
             latexStr += `\\end{aligned}`;
@@ -450,7 +536,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Végtelen sok megoldás
         const freeVars = classification.freeColumns;
         const pivotCols = classification.pivotColumns;
         const pivotRowByCol = classification.pivotRowByCol;
@@ -458,7 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let latexStr = `\\begin{aligned}\n`;
 
         freeVars.forEach((col, idx) => {
-            latexStr += `x_{${col + 1}} &= t_{${idx + 1}} \\\\\n`;
+            latexStr += `a_{${col + 1}} &= t_{${idx + 1}} \\\\\n`;
         });
 
         pivotCols.forEach((pCol) => {
@@ -478,7 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-            latexStr += `x_{${pCol + 1}} &= ${expr} \\\\\n`;
+            latexStr += `a_{${pCol + 1}} &= ${expr} \\\\\n`;
         });
 
         latexStr += `\\end{aligned}`;
@@ -614,6 +699,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!nearlyZero(row[c])) return c;
         }
         return -1;
+    }
+
+    function normalizeLabel(label) {
+        return String(label).replace(/\s/g, "");
     }
 
     function nearlyZero(x) {

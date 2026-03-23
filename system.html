@@ -36,7 +36,7 @@
     <section class="section">
       <div class="section-card">
 
-        <h1 class="section-title">Lineáris Egyenletrendszerek (\(Ax=b\))</h1>
+        <h1 class="section-title">Lineáris Egyenletrendszerek (\(Aa=b\))</h1>
 
         <p class="section-lead">
           Oldjunk meg egyenletrendszereket lépésről lépésre Gauss–Jordan eliminációval!
@@ -48,6 +48,8 @@
           <strong>Hogyan használd?</strong>
           Add meg a sorok számát (egyenletek száma) és az oszlopok számát (ismeretlenek száma).
           Töltsd ki az \(A\) együtthatómátrixot, és a jobb oldalon a \(b\) oszlopot.
+          A bázis kezdetben az \(e_1, e_2, \dots\) változókból áll, majd pivotáláskor ezek helyére
+          az \(a_1, a_2, \dots\) változók léphetnek.
         </p>
 
         <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
@@ -90,7 +92,7 @@
           <div id="matrix-display-area" class="matrix-display-area hidden">
             <h3 id="step-title">Induló állapot \([A \mid b]\)</h3>
 
-            <div id="system-warning" class="error-banner hidden"></div>
+
 
             <div id="latex-output" class="math-display" style="width: 100%;"></div>
 
@@ -100,6 +102,23 @@
                 Kiválasztott lépés végrehajtása
               </button>
             </div>
+
+                        <div
+              id="basis-info"
+              style="
+                margin: 1rem auto 1.25rem;
+                max-width: 900px;
+                background: rgba(244, 228, 210, 0.45);
+                border: 1px solid rgba(123, 74, 45, 0.15);
+                border-radius: 12px;
+                padding: 0.9rem 1rem;
+                color: #5f4939;
+                text-align: left;
+              "
+            ></div>
+
+            <div id="system-warning" class="error-banner hidden" style="display: none !important;"></div>
+
           </div>
 
         </div>

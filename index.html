@@ -126,9 +126,39 @@
           Válassz egy témakört a gyakorláshoz. Mélyítsd el a tudást a gyakorlati feladatokkal!
         </p>
 
-        <h3 class="grid-category-title">Gyakorlat</h3>
+<h3 class="grid-category-title">Elmélet (Letölthető jegyzetek)</h3>
         <div class="practice-grid">
           
+          <button class="practice-card theory-btn" data-pdf="pdfs/matrix.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">M</span>
+            <span>Mátrixok</span>
+          </button>
+
+          <button class="practice-card theory-btn" data-pdf="pdfs/pivot.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">P</span>
+            <span>Pivotálás</span>
+          </button>
+
+          <button class="practice-card theory-btn" data-pdf="pdfs/inverz.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">I</span>
+            <span>Inverz számítás</span>
+          </button>
+
+          <button class="practice-card theory-btn" data-pdf="pdfs/determinans.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">D</span>
+            <span>Determináns</span>
+          </button>
+
+          <button class="practice-card theory-btn" data-pdf="pdfs/egyenletrendszer.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">E</span>
+            <span>Egyenletrendszer</span>
+          </button>
+
+        </div>
+
+        <h3 class="grid-category-title">Gyakorlat</h3>
+        <div class="practice-grid">
+
           <a href="pivot.html" class="practice-card">
             <span class="practice-icon">P</span>
             <span>Pivotálás</span>
@@ -220,14 +250,14 @@
               <button type="button" id="btn-generate-zh" class="btn-main btn-primary">
                 Feladatsor generálása
               </button>
-              <button
+            <!--<button
                 type="button"
                 id="btn-show-solutions"
                 class="btn-main btn-secondary"
                 disabled
               >
                 Megoldókulcs megjelenítése
-              </button>
+              </button>-->
               <button
                 type="button"
                 id="btn-print-tasks"
@@ -235,13 +265,13 @@
               >
                 Feladatlap PDF
               </button>
-              <button
+              <!--<button
                 type="button"
                 id="btn-print-all"
                 class="btn-main btn-secondary"
               >
                 Feladat + megoldás PDF
-              </button>
+              </button>-->
             </div>
 
             <div id="gen-result-container" class="generation-result hidden">
@@ -270,6 +300,17 @@
         </div>
       </div>
     </section>
+
+    <div id="pdf-modal" class="pdf-modal hidden">
+      <div class="pdf-modal-content">
+        <div class="pdf-modal-header">
+          <h3 id="pdf-modal-title">Elméleti jegyzet</h3>
+          <button id="pdf-modal-close" class="btn-main btn-secondary" style="padding: 0.4rem 1rem;">Bezárás</button>
+        </div>
+        <iframe id="pdf-viewer" src="" frameborder="0" width="100%" height="100%"></iframe>
+      </div>
+    </div>
+
   </main>
 
   <!-- FOOTER -->

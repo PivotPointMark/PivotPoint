@@ -265,3 +265,47 @@ async function incrementGenCount() {
         console.error("Számláló hiba:", error);
     }
 }
+
+/* ========= PDF MODAL KEZELÉSE ========= */
+document.addEventListener("DOMContentLoaded", () => {
+  const theoryBtns = document.querySelectorAll(".theory-btn");
+  const pdfModal = document.getElementById("pdf-modal");
+  const pdfModalClose = document.getElementById("pdf-modal-close");
+  const pdfViewer = document.getElementById("pdf-viewer");
+  const pdfModalTitle = document.getElementById("pdf-modal-title");
+
+  if (theoryBtns.length > 0 && pdfModal) {
+    theoryBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const pdfUrl = btn.getAttribute("data-pdf");
+        const topicName = btn.querySelector("span:nth-child(2)").textContent;
+        
+        // Cím frissítése
+        pdfModalTitle.textContent = topicName + " – Elméleti összefoglaló";
+        
+        // PDF betöltése (a böngésző beépített olvasójával)
+        pdfViewer.src = pdfUrl;
+        
+        // Ablak megjelenítése és háttér görgetésének tiltása
+        pdfModal.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      });
+    });
+
+    const closeModal = () => {
+      pdfModal.classList.add("hidden");
+      pdfViewer.src = ""; // Kiürítjük, hogy ne fusson a háttérben
+      document.body.style.overflow = ""; // Görgő visszaállítása
+    };
+
+    // Bezárás gombra kattintva
+    pdfModalClose.addEventListener("click", closeModal);
+
+    // Ha a sötét háttérre kattintasz a dobozon kívül, akkor is bezár
+    pdfModal.addEventListener("click", (e) => {
+      if (e.target === pdfModal) {
+        closeModal();
+      }
+    });
+  }
+});

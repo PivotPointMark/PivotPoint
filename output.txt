@@ -2338,12 +2338,7 @@ inverse.js
 ********************************************
 // ======================
 // INVERSE.JS – Gauss-Jordan Invertálás Fix Oszlopfeliratokkal
-// MÓDOSÍTVA a kért UI-logikára:
-// - "Kiválasztott lépés végrehajtása" gomb CSAK akkor látszik, ha van kiválasztott pivot
-// - ha nincs kiválasztás: se gomb, se "következő lépés" jellegű üzenet
-// - rendezés utáni/végi üzenet: csak "A sorok rendezve lettek."
-// - NINCS "bal oldali mátrix" szövegezés
-// - automatikusan felkínálja a rendezést (gomb), ha a sorcímkék már (a_i) halmazt adják, de rossz sorrendben
+// ÚJ FUNKCIÓ: "Ellenőrzés" gomb hozzáadva, ami levezeti az A * A^-1 = I szorzást.
 // ======================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -2365,8 +2360,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const stepTitle = document.getElementById("step-title");
 
-    // --- Dinamikus gomb: "Egységmátrixra hozás" (sorok rendezése) ---
-    // Nem kell HTML-t módosítanod: itt létrehozzuk és beszúrjuk a btnStep mellé.
+    // --- Dinamikus gomb: "Egységmátrixra hozás" ---
     const btnFinalizeIdentity = document.createElement("button");
     btnFinalizeIdentity.id = "btn-finalize-identity";
     btnFinalizeIdentity.className = "btn-main btn-secondary hidden";
@@ -2374,7 +2368,16 @@ document.addEventListener("DOMContentLoaded", () => {
     btnFinalizeIdentity.textContent = "Egységmátrixra hozás";
     stepControls.appendChild(btnFinalizeIdentity);
 
+    // --- ÚJ Dinamikus gomb: "Ellenőrzés" ---
+    const btnVerify = document.createElement("button");
+    btnVerify.id = "btn-verify";
+    btnVerify.className = "btn-main btn-primary hidden";
+    btnVerify.style.marginLeft = "0.5rem";
+    btnVerify.textContent = "Ellenőrzés (A · A⁻¹)";
+    stepControls.appendChild(btnVerify);
+
     // ÁLLAPOT
+    let originalMatrixA = []; // Eltároljuk az eredeti mátrixot az ellenőrzéshez
     let currentMatrixA = [];
     let currentMatrixI = [];
     let matrixSize = 0;
@@ -2427,6 +2430,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stepControls.classList.add("hidden");
         btnStep.classList.add("hidden");
         btnFinalizeIdentity.classList.add("hidden");
+        btnVerify.classList.add("hidden");
         pivotInfo.innerHTML = "";
     }
 
@@ -2434,11 +2438,13 @@ document.addEventListener("DOMContentLoaded", () => {
         stepControls.classList.remove("hidden");
         btnStep.classList.remove("hidden");
         btnFinalizeIdentity.classList.add("hidden");
+        btnVerify.classList.add("hidden");
     }
 
     function showFinalizeControls(messageHtml) {
         stepControls.classList.remove("hidden");
         btnStep.classList.add("hidden");
+        btnVerify.classList.add("hidden");
         btnFinalizeIdentity.classList.remove("hidden");
         pivotInfo.innerHTML = messageHtml || "";
         refreshMath(pivotInfo);
@@ -2471,7 +2477,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Ha van pivot kijelölés, akkor a lépés gomb látszik, különben semmi.
         if (selectedPivot) showPivotControls();
         else hideAllControls();
     }
@@ -2509,13 +2514,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const newA = currentMatrixA.map(row => row.slice());
         const newI = currentMatrixI.map(row => row.slice());
 
-        // pivot sor normálása
         for (let j = 0; j < n; j++) {
             newA[pRow][j] /= pivotVal;
             newI[pRow][j] /= pivotVal;
         }
 
-        // oszlop kinullázás
         for (let i = 0; i < n; i++) {
             if (i !== pRow) {
                 const factor = currentMatrixA[i][pCol];
@@ -2563,11 +2566,13 @@ document.addEventListener("DOMContentLoaded", () => {
         stepCount++;
         appendNewStep(currentMatrixA, currentMatrixI, stepCount);
 
-        // Végi üzenet (nincs "bal oldal")
+        // Végi üzenet és az ellenőrzés gomb megjelenítése
         stepControls.classList.remove("hidden");
         btnStep.classList.add("hidden");
         btnFinalizeIdentity.classList.add("hidden");
-        pivotInfo.innerHTML = "A sorok rendezve lettek.";
+        btnVerify.classList.remove("hidden"); // Ellenőrzés gomb aktív
+
+        pivotInfo.innerHTML = "A sorok rendezve lettek. Most ellenőrizheted az eredményt mátrixszorzással.";
         refreshMath(pivotInfo);
 
         if (stepTitle) stepTitle.textContent = "Kész";
@@ -2582,7 +2587,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const thead = document.createElement("thead");
         const headerRow = document.createElement("tr");
 
-        headerRow.appendChild(document.createElement("th")); // üres sarok
+        headerRow.appendChild(document.createElement("th"));
 
         headers.forEach(h => {
             const th = document.createElement("th");
@@ -2649,10 +2654,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const augmentedWrapper = document.createElement("div");
         augmentedWrapper.className = "augmented-matrix-wrapper active-wrapper";
 
-        // Bal tábla: A (fix oszlopcímkék a1..an)
         const tableA = createMatrixTable(matA, true, colLabels, true, "left");
 
-        // Jobb tábla: I (fix e1..en oszlopcímkék)
         const eHeaders = Array.from({ length: matrixSize }, (_, i) => `e_{${i + 1}}`);
         const tableI = createMatrixTable(matI, false, eHeaders, false, "right");
 
@@ -2736,11 +2739,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Eltesszük az eredeti A mátrixot az ellenőrzéshez
+        originalMatrixA = currentMatrixA.map(row => row.slice());
+
         currentMatrixI = Array.from({ length: matrixSize }, (_, i) =>
             Array.from({ length: matrixSize }, (_, j) => (i === j ? 1 : 0))
         );
 
-        // Címkék
         rowLabels = Array.from({ length: matrixSize }, (_, i) => `e_{${i + 1}}`);
         colLabels = Array.from({ length: matrixSize }, (_, i) => `a_{${i + 1}}`);
 
@@ -2761,11 +2766,10 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshMath(stepTitle);
     });
 
-    // 3. Lépés végrehajtása (CSAK kijelölt pivot esetén)
+    // 3. Lépés végrehajtása
     btnStep.addEventListener("click", () => {
         if (!selectedPivot) return;
 
-        // sorcímke frissítése
         rowLabels[selectedPivot.row] = colLabels[selectedPivot.col];
 
         freezeLastTable();
@@ -2775,13 +2779,82 @@ document.addEventListener("DOMContentLoaded", () => {
         stepCount++;
         appendNewStep(currentMatrixA, currentMatrixI, stepCount);
 
-        // kijelölés megszűnt -> csak akkor látszanak gombok, ha kell (rendezés) / vagy új kijelölés történik
         updateFinalizeButtonVisibility();
     });
 
     // 4. Sorok egységmátrix szerinti rendezése
     btnFinalizeIdentity.addEventListener("click", () => {
         reorderRowsToIdentity();
+    });
+
+    // 5. ÚJ FUNKCIÓ: Ellenőrzés levezetése (A * A^-1)
+    btnVerify.addEventListener("click", () => {
+        btnVerify.classList.add("hidden"); // Elrejtjük a gombot
+        pivotInfo.innerHTML = "Sikeres ellenőrzés: $A \\cdot A^{-1} = I$";
+        refreshMath(pivotInfo);
+
+        const verifyWrapper = document.createElement("div");
+        verifyWrapper.className = "step-block";
+        verifyWrapper.style.textAlign = "left";
+        verifyWrapper.style.marginTop = "2rem";
+        verifyWrapper.style.padding = "1rem";
+        verifyWrapper.style.backgroundColor = "rgba(123, 74, 45, 0.05)";
+        verifyWrapper.style.borderRadius = "8px";
+
+        const title = document.createElement("h4");
+        title.style.color = "#7b4a2d";
+        title.textContent = "Mátrixszorzás levezetése elemenként ($A \\cdot A^{-1}$):";
+        verifyWrapper.appendChild(title);
+
+        const n = matrixSize;
+        let latexString = "$$\\begin{aligned}\n";
+
+        // Végigmegyünk az eredeti A mátrix sorain (i) és az Inverz mátrix oszlopain (j)
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let terms = [];
+                let sum = 0;
+                
+                // Szorzatösszeg számítása (k)
+                for (let k = 0; k < n; k++) {
+                    const valA = originalMatrixA[i][k];
+                    const valInv = currentMatrixI[k][j];
+                    
+                    // Itt látszik, hogy a gép valójában végrehajtja a számítást!
+                    sum += (valA * valInv);
+
+                    const fracA = toFraction(valA);
+                    const fracInv = toFraction(valInv);
+
+                    // Zárójelezzük a negatív értékeket a tiszta LaTeX szintaktika érdekében
+                    const strA = fracA.startsWith('-') ? `(${fracA})` : fracA;
+                    const strInv = fracInv.startsWith('-') ? `(${fracInv})` : fracInv;
+
+                    terms.push(`${strA} \\cdot ${strInv}`);
+                }
+                
+                // Végeredmény kerekítése a lebegőpontos pontatlanságok miatt, majd törtté alakítása
+                const finalSumFrac = toFraction(Math.round(sum * 1e9) / 1e9);
+                latexString += `c_{${i+1},${j+1}} &= ${terms.join(" + ")} = ${finalSumFrac} \\\\\n`;
+            }
+            // Üres sorköz a sorok (i) között a jobb olvashatóságért
+            if (i < n - 1) {
+                latexString += `\\\\[1.5ex]\n`;
+            }
+        }
+        latexString += "\\end{aligned}$$";
+
+        const mathDiv = document.createElement("div");
+        mathDiv.innerHTML = latexString;
+        verifyWrapper.appendChild(mathDiv);
+
+        latexOutput.appendChild(verifyWrapper);
+        refreshMath(verifyWrapper);
+        
+        // Automatikus legörgetés az ellenőrzéshez
+        setTimeout(() => {
+            verifyWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
     });
 });
 
@@ -3168,59 +3241,81 @@ system.js
 ********************************************
 ********************************************
 // ======================
-// SYSTEM.JS – Lineáris egyenletrendszer megoldó (Gauss-Jordan)
+// SYSTEM.JS – Általános lineáris egyenletrendszer megoldó (Gauss-Jordan / RREF)
+// Kezel: m x n mátrixokat is, pl. 2x5, 3x6
+// MÓDOSÍTVA:
+// - e1, e2, ... bázisváltozók megjelenítése
+// - a1, a2, ... oszlopváltozók megjelenítése
+// - pivot után a bázis automatikusan frissül
+// - a végső megoldásban x helyett a szerepel
+// - nincs "Bázis" felirat bal fent
+// - a b oszlop előtt nincsenek sorfeliratok
 // ======================
 
 document.addEventListener("DOMContentLoaded", () => {
-    const sizeInput = document.getElementById("matrix-size");
+    const rowsInput = document.getElementById("matrix-rows");
+    const colsInput = document.getElementById("matrix-cols");
+
     const btnCreate = document.getElementById("btn-create-grid");
     const btnShow = document.getElementById("btn-show-matrix");
     const btnFillRandom = document.getElementById("btn-fill-random");
-    
+
     const inputWrapper = document.getElementById("matrix-input-wrapper");
     const gridContainer = document.getElementById("matrix-grid");
-    
+
     const displayArea = document.getElementById("matrix-display-area");
     const latexOutput = document.getElementById("latex-output");
-    
+
     const stepControls = document.getElementById("step-controls");
     const pivotInfo = document.getElementById("selected-pivot-info");
     const btnStep = document.getElementById("btn-perform-step");
     const stepTitle = document.getElementById("step-title");
-    const singularWarning = document.getElementById("singular-warning");
+    const systemWarning = document.getElementById("system-warning");
+    const basisInfo = document.getElementById("basis-info");
 
     // ÁLLAPOT
-    let currentMatrixA = []; // Bal oldal (A mátrix: n x n)
-    let currentVectorB = []; // Jobb oldal (b vektor: n x 1)
-    let matrixSize = 0;
-    let selectedPivot = null; 
+    let currentMatrixA = []; // m x n
+    let currentVectorB = []; // m x 1
+    let rowCount = 0;
+    let colCount = 0;
+    let selectedPivot = null;
     let stepCount = 0;
 
-    // 1. Mátrix keret létrehozása (n x (n+1) rács)
+    // Jelölések
+    let rowLabels = []; // aktuális bázis: kezdetben e_i, később egy részük a_j
+    let colLabels = []; // a_1, a_2, ...
+
+    // 1. Mátrix keret létrehozása
     btnCreate.addEventListener("click", () => {
-        const n = parseInt(sizeInput.value);
-        if (isNaN(n) || n < 2 || n > 5) {
-            alert("Az ismeretlenek száma 2 és 5 között lehet.");
+        const m = parseInt(rowsInput.value, 10);
+        const n = parseInt(colsInput.value, 10);
+
+        if (isNaN(m) || isNaN(n) || m < 1 || n < 1 || m > 8 || n > 8) {
+            alert("A sorok és oszlopok száma 1 és 8 között lehet.");
             return;
         }
-        matrixSize = n;
+
+        rowCount = m;
+        colCount = n;
         stepCount = 0;
+        selectedPivot = null;
+
+        rowLabels = Array.from({ length: m }, (_, i) => `e_${i + 1}`);
+        colLabels = Array.from({ length: n }, (_, i) => `a_${i + 1}`);
 
         gridContainer.innerHTML = "";
-        // Itt n+1 oszlop kell (n darab A együttható + 1 darab b vektor)
         gridContainer.style.gridTemplateColumns = `repeat(${n + 1}, 1fr)`;
 
-        for (let r = 0; r < n; r++) {
+        for (let r = 0; r < m; r++) {
             for (let c = 0; c < n + 1; c++) {
                 const input = document.createElement("input");
                 input.type = "number";
                 input.className = "matrix-cell";
                 input.dataset.row = r;
                 input.dataset.col = c;
-                input.value = ""; 
+                input.value = "";
                 input.addEventListener("focus", () => input.select());
 
-                // Vizuális elválasztás a 'b' vektornak (az utolsó oszlop)
                 if (c === n) {
                     input.style.borderLeft = "3px solid #7b4a2d";
                     input.style.backgroundColor = "rgba(224, 184, 120, 0.15)";
@@ -3234,150 +3329,97 @@ document.addEventListener("DOMContentLoaded", () => {
         inputWrapper.classList.remove("hidden");
         displayArea.classList.add("hidden");
         stepControls.classList.add("hidden");
-        singularWarning.classList.add("hidden");
-        latexOutput.innerHTML = ""; 
+        systemWarning.classList.add("hidden");
+        systemWarning.innerHTML = "";
+        latexOutput.innerHTML = "";
+        basisInfo.innerHTML = "";
     });
 
-    // 2. Véletlen kitöltés - NEHEZÍTETT OKOS GENERÁTOR (Mindig egész megoldást ad)
+    // 2. Véletlen kitöltés – mindig konzisztens rendszert készít
     btnFillRandom.addEventListener("click", () => {
-        const n = matrixSize;
-        
-        let A = [];
-        let x = [];
-        let b = [];
-        let valid = false;
-        let attempts = 0;
+        const m = rowCount;
+        const n = colCount;
 
-        // Addig keverjük, amíg "szép" és "kellően nehéz" mátrixot nem kapunk
-        while (!valid && attempts < 1500) {
-            attempts++;
-            
-            // 1. Induljunk ki egységmátrixból
-            A = Array.from({length: n}, (_, i) => 
-                Array.from({length: n}, (_, j) => i === j ? 1 : 0)
-            );
+        if (!m || !n) {
+            alert("Előbb hozd létre a mátrix keretet.");
+            return;
+        }
 
-            // 2. Sorműveletek nagyobb szorzókkal
-            const rowIterations = n * 3; 
-            for (let step = 0; step < rowIterations; step++) {
-                let r1 = Math.floor(Math.random() * n);
-                let r2 = Math.floor(Math.random() * n);
-                if (r1 !== r2) {
-                    // Nagyobb szorzók, hogy nőjenek a számok (-3..3)
-                    let possibleK = [-3, -2, -1, 1, 2, 3]; 
-                    let k = possibleK[Math.floor(Math.random() * possibleK.length)];
-                    for (let c = 0; c < n; c++) {
-                        A[r1][c] += k * A[r2][c];
-                    }
-                }
-            }
+        let A = Array.from({ length: m }, () =>
+            Array.from({ length: n }, () => randomInt(-6, 6))
+        );
 
-            // 3. Oszlopműveletek (hogy a mintázatok is eltűnjenek)
-            const colIterations = n * 2;
-            for (let step = 0; step < colIterations; step++) {
-                let c1 = Math.floor(Math.random() * n);
-                let c2 = Math.floor(Math.random() * n);
-                if (c1 !== c2) {
-                    let possibleK = [-2, -1, 1, 2];
-                    let k = possibleK[Math.floor(Math.random() * possibleK.length)];
-                    for (let r = 0; r < n; r++) {
-                        A[r][c1] += k * A[r][c2];
-                    }
-                }
-            }
-
-            // 4. Sorcsere a randomabb kinézetért
-            for(let step = 0; step < n; step++) {
-                let r1 = Math.floor(Math.random() * n);
-                let r2 = Math.floor(Math.random() * n);
-                let temp = A[r1];
-                A[r1] = A[r2];
-                A[r2] = temp;
-            }
-
-            // 5. Ellenőrizzük a nehézséget
-            let maxVal = 0;
-            let zeroCount = 0;
-            for (let r = 0; r < n; r++) {
-                for (let c = 0; c < n; c++) {
-                    let absVal = Math.abs(A[r][c]);
-                    if (absVal > maxVal) maxVal = absVal;
-                    if (absVal === 0) zeroCount++;
-                }
-            }
-
-            // Feltétel: Legyen legalább 5-ös szám benne, max 35-ig, és ne legyen tele nullával
-            if (maxVal >= 5 && maxVal <= 35 && zeroCount <= n - 1) {
-                valid = true;
+        for (let r = 0; r < m; r++) {
+            if (A[r].every(v => v === 0)) {
+                const c = randomInt(0, n - 1);
+                A[r][c] = randomNonZeroInt(-6, 6);
             }
         }
 
-        // 6. Generáljuk le a végeredményt (x vektor) egészekből (-5 és 5 között)
-        for (let i = 0; i < n; i++) {
-            x.push(Math.floor(Math.random() * 11) - 5); 
-        }
+        const solutionVector = Array.from({ length: n }, () => randomInt(-5, 5));
 
-        // 7. Számoljuk ki a b vektort: b = A * x
-        for (let i = 0; i < n; i++) {
+        const b = Array.from({ length: m }, (_, r) => {
             let sum = 0;
-            for (let j = 0; j < n; j++) {
-                sum += A[i][j] * x[j];
+            for (let c = 0; c < n; c++) {
+                sum += A[r][c] * solutionVector[c];
             }
-            b.push(sum);
-        }
+            return sum;
+        });
 
-        // 8. Írjuk be a mezőkbe a mátrixot és a b vektort
         const inputs = gridContainer.querySelectorAll("input");
         inputs.forEach((input, index) => {
-            let r = Math.floor(index / (n + 1));
-            let c = index % (n + 1);
-            
+            const r = Math.floor(index / (n + 1));
+            const c = index % (n + 1);
+
             if (c < n) {
-                input.value = A[r][c]; // A mátrix elemei
+                input.value = A[r][c];
             } else {
-                input.value = b[r];    // b vektor elemei
+                input.value = b[r];
             }
         });
     });
 
-    // 3. Számítás indítása (A és b inicializálása)
+    // 3. Számítás indítása
     btnShow.addEventListener("click", () => {
         const inputs = gridContainer.querySelectorAll("input");
+
+        if (!rowCount || !colCount || inputs.length === 0) {
+            alert("Előbb hozd létre a mátrix keretet.");
+            return;
+        }
+
         currentMatrixA = [];
         currentVectorB = [];
-        
-        let currentRowA = [];
-        let currentRowB = [];
 
-        // A mátrix beolvasása
+        let currentRowA = [];
+
         inputs.forEach((input, index) => {
             let val = input.value === "" ? 0 : parseFloat(input.value);
-            if (isNaN(val)) val = 0; 
-            
-            let c = index % (matrixSize + 1);
-            
-            if (c < matrixSize) {
+            if (isNaN(val)) val = 0;
+
+            const c = index % (colCount + 1);
+
+            if (c < colCount) {
                 currentRowA.push(val);
             } else {
-                currentRowB.push(val);
                 currentMatrixA.push(currentRowA);
-                currentVectorB.push(currentRowB);
+                currentVectorB.push([val]);
                 currentRowA = [];
-                currentRowB = [];
             }
         });
 
-        // Det ellenőrzés
-        const det = calculateDeterminant(currentMatrixA);
-        if (Math.abs(det) < 1e-9) singularWarning.classList.remove("hidden");
-        else singularWarning.classList.add("hidden");
+        rowLabels = Array.from({ length: rowCount }, (_, i) => `e_${i + 1}`);
+        colLabels = Array.from({ length: colCount }, (_, i) => `a_${i + 1}`);
 
         stepCount = 0;
-        latexOutput.innerHTML = ""; 
+        selectedPivot = null;
+        latexOutput.innerHTML = "";
         displayArea.classList.remove("hidden");
-        stepTitle.style.display = "none"; 
+        stepTitle.style.display = "none";
+        stepControls.classList.add("hidden");
 
-        // Kirajzoljuk a [A | b] párost
+        updateBasisInfo();
+        updateSystemWarning();
         appendNewStep(currentMatrixA, currentVectorB, stepCount);
     });
 
@@ -3385,21 +3427,43 @@ document.addEventListener("DOMContentLoaded", () => {
     btnStep.addEventListener("click", () => {
         if (!selectedPivot) return;
 
+        // A kiválasztott sor bázisváltozója lecserélődik a kiválasztott oszlop változójára
+        rowLabels[selectedPivot.row] = colLabels[selectedPivot.col];
+
         freezeLastTable();
-        
-        // Művelet mindkét mátrixon
         performGaussJordanStep(selectedPivot.row, selectedPivot.col);
 
         selectedPivot = null;
-        stepControls.classList.add("hidden"); 
+        stepControls.classList.add("hidden");
         stepCount++;
 
+        updateBasisInfo();
+        updateSystemWarning();
         appendNewStep(currentMatrixA, currentVectorB, stepCount);
     });
 
-    /**
-     * Új lépés kirajzolása (A és b egymás mellett)
-     */
+    function updateBasisInfo() {
+        if (!basisInfo) return;
+
+        const basisSet = new Set(rowLabels.map(normalizeLabel));
+        const nonBasis = colLabels.filter(label => !basisSet.has(normalizeLabel(label)));
+
+        basisInfo.innerHTML = `
+            <div style="margin-bottom:0.45rem;">
+                <strong>Aktuális bázis:</strong>
+                ${rowLabels.map(l => `$${l}$`).join(", ")}
+            </div>
+            <div>
+                <strong>Nem bázisváltozók:</strong>
+                ${nonBasis.length ? nonBasis.map(l => `$${l}$`).join(", ") : "—"}
+            </div>
+        `;
+
+        if (window.MathJax) {
+            MathJax.typesetPromise([basisInfo]).catch(() => {});
+        }
+    }
+
     function appendNewStep(matA, vecB, count) {
         if (count > 0) {
             const arrowDiv = document.createElement("div");
@@ -3412,26 +3476,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const stepWrapper = document.createElement("div");
-        stepWrapper.className = "step-block"; 
+        stepWrapper.className = "step-block";
         stepWrapper.style.textAlign = "center";
-        
+
         const label = document.createElement("h4");
         label.style.color = "#7b4a2d";
         label.style.marginBottom = "0.5rem";
-        
-        if (count === 0) label.textContent = "Kiindulás: [ A | b ] (Válassz pivotot az A részben!)";
-        else label.textContent = `${count}. lépés eredménye`;
-        
-        // KONTÉNER A KÉT TÁBLÁZATNAK
+
+        if (count === 0) {
+            label.innerHTML = "Kiindulás: \\([A \\mid b]\\) (Válassz pivotot az \\(A\\) részben!)";
+        } else {
+            label.textContent = `${count}. lépés eredménye`;
+        }
+
         const augmentedWrapper = document.createElement("div");
         augmentedWrapper.className = "augmented-matrix-wrapper active-wrapper";
 
-        // --- BAL TÁBLA (A) - Interaktív ---
-        const tableA = createMatrixTable(matA, true);
+        const tableA = createMatrixTable(matA, true, "A");
         tableA.classList.add("matrix-left");
-        
-        // --- JOBB TÁBLA (b) - Passzív ---
-        const tableB = createMatrixTable(vecB, false);
+
+        const tableB = createMatrixTable(vecB, false, "b");
         tableB.classList.add("matrix-right");
 
         augmentedWrapper.appendChild(tableA);
@@ -3441,51 +3505,101 @@ document.addEventListener("DOMContentLoaded", () => {
         stepWrapper.appendChild(augmentedWrapper);
         latexOutput.appendChild(stepWrapper);
 
-        // Ellenőrizzük, hogy készen vagyunk-e (Egységmátrix van-e bal oldalt)
-        if (checkIfSolved(matA)) {
+        const endState = getEndState(matA, vecB);
+
+        if (endState.done) {
             augmentedWrapper.classList.remove("active-wrapper");
-            freezeLastTable(); // Letiltjuk a további kattintást
-            showFinalSolution(vecB, stepWrapper);
+            freezeLastTable();
+            showFinalSolution(stepWrapper, endState.classification, endState.reason);
         } else {
             stepWrapper.scrollIntoView({ behavior: "smooth", block: "start" });
         }
+
+        if (window.MathJax) {
+            MathJax.typesetPromise([stepWrapper]).catch(() => {});
+        }
     }
 
-    /**
-     * Segédfüggvény HTML táblázat gyártáshoz
-     */
-    function createMatrixTable(matrixData, isInteractive) {
+    function createMatrixTable(matrixData, isInteractive, type) {
         const table = document.createElement("table");
         table.className = "interactive-matrix";
+
         const rows = matrixData.length;
         const cols = matrixData[0].length;
 
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+
+        const corner = document.createElement("th");
+        corner.innerHTML = "";
+        corner.style.padding = "8px 10px";
+        headerRow.appendChild(corner);
+
+        if (type === "A") {
+            for (let c = 0; c < cols; c++) {
+                const th = document.createElement("th");
+                th.innerHTML = `$${colLabels[c]}$`;
+                th.style.padding = "8px 12px";
+                th.style.color = "#7b4a2d";
+                headerRow.appendChild(th);
+            }
+        } else {
+            const th = document.createElement("th");
+            th.innerHTML = "$b$";
+            th.style.padding = "8px 12px";
+            th.style.color = "#7b4a2d";
+            headerRow.appendChild(th);
+        }
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
         for (let r = 0; r < rows; r++) {
             const tr = document.createElement("tr");
+
+            const rowHeader = document.createElement("th");
+
+            if (type === "A") {
+                rowHeader.innerHTML = `$${rowLabels[r]}$`;
+                rowHeader.style.color = "#7b4a2d";
+                rowHeader.style.fontWeight = "700";
+            } else {
+                rowHeader.innerHTML = "";
+            }
+
+            rowHeader.style.padding = "8px 12px";
+            tr.appendChild(rowHeader);
+
             for (let c = 0; c < cols; c++) {
                 const td = document.createElement("td");
                 td.className = "interactive-cell";
-                
-                let val = matrixData[r][c];
-                let displayVal = Math.abs(Math.round(val) - val) < 1e-9 ? Math.round(val) : val.toFixed(2);
-                td.textContent = displayVal;
+
+                const val = matrixData[r][c];
+                td.textContent = formatAsFraction(val);
 
                 if (isInteractive) {
                     td.onclick = () => {
-                        const wrapper = table.closest('.augmented-matrix-wrapper');
+                        const wrapper = table.closest(".augmented-matrix-wrapper");
                         if (!wrapper || !wrapper.classList.contains("active-wrapper")) return;
+
                         handleCellClick(r, c, val, td, table);
                     };
                 } else {
                     td.style.backgroundColor = "#faf5f0";
                     td.style.fontWeight = "bold";
                     td.style.color = "#5f4939";
+                    td.style.cursor = "default";
                 }
 
                 tr.appendChild(td);
             }
-            table.appendChild(tr);
+
+            tbody.appendChild(tr);
         }
+
+        table.appendChild(tbody);
         return table;
     }
 
@@ -3508,101 +3622,407 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Nullát nem választhatsz pivot elemnek!");
             return;
         }
+
         const prev = tableElement.querySelector(".selected");
         if (prev) prev.classList.remove("selected");
 
         cellElement.classList.add("selected");
         selectedPivot = { row: r, col: c, value: val };
-        pivotInfo.innerHTML = `Választott pivot: <span style="color:var(--color-primary); font-size:1.2em;">${parseFloat(val.toFixed(2))}</span>`;
+
+        pivotInfo.innerHTML =
+            `Választott pivot: <span style="color:var(--color-primary); font-size:1.1em;">$${rowLabels[r]} \\leftrightarrow ${colLabels[c]}$</span> &nbsp; (érték: <strong>${formatAsFraction(val)}</strong>)`;
+
         stepControls.classList.remove("hidden");
+
+        if (window.MathJax) {
+            MathJax.typesetPromise([pivotInfo]).catch(() => {});
+        }
     }
 
-    /**
-     * GAUSS-JORDAN LÉPÉS A és b mátrixokon
-     */
     function performGaussJordanStep(pRow, pCol) {
-        const n = matrixSize;
-        let newA = currentMatrixA.map(row => row.slice());
-        let newB = currentVectorB.map(row => row.slice());
-        
+        const m = rowCount;
+        const n = colCount;
+
+        const newA = currentMatrixA.map(row => row.slice());
+        const newB = currentVectorB.map(row => row.slice());
+
         const pivotVal = newA[pRow][pCol];
-        
-        // 1. SOR LEOSZTÁSA (Mindkét mátrixban!)
-        for (let j = 0; j < n; j++) newA[pRow][j] /= pivotVal;
+
+        // 1. Pivot sor normálása
+        for (let j = 0; j < n; j++) {
+            newA[pRow][j] /= pivotVal;
+        }
         newB[pRow][0] /= pivotVal;
 
+        for (let j = 0; j < n; j++) {
+            if (Math.abs(newA[pRow][j]) < 1e-12) newA[pRow][j] = 0;
+            if (Math.abs(newA[pRow][j] - 1) < 1e-12) newA[pRow][j] = 1;
+        }
+        if (Math.abs(newB[pRow][0]) < 1e-12) newB[pRow][0] = 0;
         newA[pRow][pCol] = 1;
 
-        // 2. KINULLÁZÁS a többi sorban
-        for (let i = 0; i < n; i++) {
-            if (i !== pRow) {
-                const factor = newA[i][pCol];
-                if (Math.abs(factor) < 1e-9) continue;
+        // 2. Nullázás ugyanabban az oszlopban minden más sorban
+        for (let i = 0; i < m; i++) {
+            if (i === pRow) continue;
 
-                for (let j = 0; j < n; j++) {
-                    newA[i][j] -= factor * newA[pRow][j];
-                }
-                newB[i][0] -= factor * newB[pRow][0];
-                newA[i][pCol] = 0; 
+            const factor = newA[i][pCol];
+            if (Math.abs(factor) < 1e-9) continue;
+
+            for (let j = 0; j < n; j++) {
+                newA[i][j] -= factor * newA[pRow][j];
+                if (Math.abs(newA[i][j]) < 1e-12) newA[i][j] = 0;
+                if (Math.abs(newA[i][j] - 1) < 1e-12) newA[i][j] = 1;
             }
+
+            newB[i][0] -= factor * newB[pRow][0];
+            if (Math.abs(newB[i][0]) < 1e-12) newB[i][0] = 0;
+
+            newA[i][pCol] = 0;
         }
-        
+
         currentMatrixA = newA;
         currentVectorB = newB;
     }
 
-    /**
-     * Ellenőrzi, hogy A mátrix átalakult-e egységmátrixszá
-     */
-    function checkIfSolved(matA) {
-        for(let r = 0; r < matrixSize; r++) {
-            for(let c = 0; c < matrixSize; c++) {
-                let expected = (r === c) ? 1 : 0;
-                if(Math.abs(matA[r][c] - expected) > 1e-6) return false;
+    function getEndState(matA, vecB) {
+        const classification = classifySystem(matA, vecB);
+
+        if (classification.type === "inconsistent") {
+            return {
+                done: true,
+                classification,
+                reason: "inconsistent"
+            };
+        }
+
+        if (classification.type === "unique") {
+            return {
+                done: true,
+                classification,
+                reason: "unique"
+            };
+        }
+
+        const maxPossiblePivots = Math.min(rowCount, colCount);
+
+        if (
+            classification.type === "infinite" &&
+            classification.pivotColumns.length === maxPossiblePivots &&
+            isReadableForParametricSolution(matA, classification)
+        ) {
+            return {
+                done: true,
+                classification,
+                reason: "infinite-max-pivots"
+            };
+        }
+
+        return {
+            done: false,
+            classification,
+            reason: null
+        };
+    }
+
+    function isReadableForParametricSolution(matA, classification) {
+        for (const pCol of classification.pivotColumns) {
+            const pRow = classification.pivotRowByCol[pCol];
+            if (pRow === undefined) return false;
+
+            for (let r = 0; r < rowCount; r++) {
+                const expected = (r === pRow) ? 1 : 0;
+                if (!nearlyEqual(matA[r][pCol], expected)) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
-    /**
-     * Kiírja a végső x1, x2... megoldásokat
-     */
-    function showFinalSolution(vecB, container) {
+    function showFinalSolution(container, classification, reason) {
         const solutionDiv = document.createElement("div");
         solutionDiv.className = "generation-result";
         solutionDiv.style.marginTop = "2rem";
-        
-        let latexStr = `\\begin{aligned}\n`;
-        for(let i = 0; i < matrixSize; i++) {
-            let val = vecB[i][0];
-            let displayVal = Math.abs(Math.round(val) - val) < 1e-9 ? Math.round(val) : val.toFixed(2);
-            latexStr += `x_${i+1} &= ${displayVal} \\\\\n`;
+
+        if (classification.type === "inconsistent") {
+            solutionDiv.innerHTML = `
+                <p style="margin-bottom:1rem; font-weight:bold; color:#9b2c2c;">
+                    A rendszer ellentmondásos, ezért nincs megoldása.
+                </p>
+                <div>$$\\text{Nincs\\ megoldás}$$</div>
+            `;
+            container.appendChild(solutionDiv);
+            if (window.MathJax) MathJax.typesetPromise([solutionDiv]).catch(() => {});
+            return;
         }
+
+        if (classification.type === "unique") {
+            let latexStr = `\\begin{aligned}\n`;
+
+            for (let c = 0; c < colCount; c++) {
+                const pivotRow = classification.pivotRowByCol[c];
+                const val = currentVectorB[pivotRow][0];
+                latexStr += `a_{${c + 1}} &= ${toLatexNumber(val)} \\\\\n`;
+            }
+
+            latexStr += `\\end{aligned}`;
+
+            solutionDiv.innerHTML = `
+                <p style="margin-bottom:1rem; font-weight:bold;">
+                    A feladatot sikeresen megoldottad.
+                </p>
+                <div>$$${latexStr}$$</div>
+            `;
+            container.appendChild(solutionDiv);
+            if (window.MathJax) MathJax.typesetPromise([solutionDiv]).catch(() => {});
+            return;
+        }
+
+        const freeVars = classification.freeColumns;
+        const pivotCols = classification.pivotColumns;
+        const pivotRowByCol = classification.pivotRowByCol;
+
+        let latexStr = `\\begin{aligned}\n`;
+
+        freeVars.forEach((col, idx) => {
+            latexStr += `a_{${col + 1}} &= t_{${idx + 1}} \\\\\n`;
+        });
+
+        pivotCols.forEach((pCol) => {
+            const r = pivotRowByCol[pCol];
+            let expr = `${toLatexNumber(currentVectorB[r][0])}`;
+
+            freeVars.forEach((fCol, idx) => {
+                const coeff = currentMatrixA[r][fCol];
+                if (nearlyZero(coeff)) return;
+
+                const paramName = `t_{${idx + 1}}`;
+
+                if (coeff > 0) {
+                    expr += ` - ${toLatexCoeff(coeff)}${paramName}`;
+                } else {
+                    expr += ` + ${toLatexCoeff(-coeff)}${paramName}`;
+                }
+            });
+
+            latexStr += `a_{${pCol + 1}} &= ${expr} \\\\\n`;
+        });
+
         latexStr += `\\end{aligned}`;
 
-        solutionDiv.innerHTML = `<p style="margin-bottom:1rem; font-weight:bold;">A feladatot sikeresen megoldottad!</p> $$${latexStr}$$`;
-        
-        container.appendChild(solutionDiv);
-        
-        if (window.MathJax) {
-            MathJax.typesetPromise([solutionDiv]).then(() => {
-                container.scrollIntoView({ behavior: "smooth", block: "start" });
-            });
+        let introText = `
+            <p style="margin-bottom:1rem; font-weight:bold; color:#7b4a2d;">
+                A rendszernek végtelen sok megoldása van.
+            </p>
+        `;
+
+        if (reason === "infinite-max-pivots") {
+            introText = `
+                <p style="margin-bottom:0.6rem; font-weight:bold; color:#7b4a2d;">
+                    A rendszernek végtelen sok megoldása van.
+                </p>
+                <p style="margin-bottom:1rem; color:#6b5241;">
+                    Már megvan a maximálisan lehetséges pivotszám, ezért a további lépések
+                    már nem adnak új pivotot, csak az alakot rendeznék tovább.
+                    A paraméteres megoldás már most kiolvasható:
+                </p>
+            `;
         }
+
+        solutionDiv.innerHTML = `
+            ${introText}
+            <div>$$${latexStr}$$</div>
+        `;
+
+        container.appendChild(solutionDiv);
+        if (window.MathJax) MathJax.typesetPromise([solutionDiv]).catch(() => {});
     }
 
-    function calculateDeterminant(m) {
-        if (m.length === 1) return m[0][0];
-        if (m.length === 2) return m[0][0] * m[1][1] - m[0][1] * m[1][0];
-        let det = 0;
-        for (let c = 0; c < m.length; c++) {
-            const sign = (c % 2 === 0) ? 1 : -1;
-            const subMatrix = m.slice(1).map(row => row.filter((_, colIndex) => colIndex !== c));
-            det += sign * m[0][c] * calculateDeterminant(subMatrix);
+    function classifySystem(matA, vecB) {
+        const m = rowCount;
+        const n = colCount;
+
+        let pivotColumns = [];
+        let pivotRowByCol = {};
+
+        for (let r = 0; r < m; r++) {
+            const rowZero = matA[r].every(v => nearlyZero(v));
+            if (rowZero && !nearlyZero(vecB[r][0])) {
+                return { type: "inconsistent" };
+            }
+
+            const lead = firstNonZeroColumn(matA[r]);
+            if (lead !== -1 && nearlyEqual(matA[r][lead], 1)) {
+                let isPivotCol = true;
+
+                for (let rr = 0; rr < m; rr++) {
+                    if (rr === r) continue;
+                    if (!nearlyZero(matA[rr][lead])) {
+                        isPivotCol = false;
+                        break;
+                    }
+                }
+
+                if (isPivotCol) {
+                    pivotColumns.push(lead);
+                    pivotRowByCol[lead] = r;
+                }
+            }
         }
-        return det;
+
+        pivotColumns = [...new Set(pivotColumns)].sort((a, b) => a - b);
+
+        const freeColumns = [];
+        for (let c = 0; c < n; c++) {
+            if (!pivotColumns.includes(c)) {
+                freeColumns.push(c);
+            }
+        }
+
+        if (pivotColumns.length === n) {
+            return {
+                type: "unique",
+                pivotColumns,
+                freeColumns,
+                pivotRowByCol
+            };
+        }
+
+        return {
+            type: "infinite",
+            pivotColumns,
+            freeColumns,
+            pivotRowByCol
+        };
+    }
+
+    function updateSystemWarning() {
+        const classification = classifySystem(currentMatrixA, currentVectorB);
+        const maxPossiblePivots = Math.min(rowCount, colCount);
+
+        systemWarning.classList.remove("hidden");
+
+        if (classification.type === "inconsistent") {
+            systemWarning.innerHTML = `
+                ⚠️ <strong>Figyelem:</strong>
+                A rendszer ellentmondásos alakot tartalmaz, ezért
+                <strong>nincs megoldás</strong>.
+            `;
+            return;
+        }
+
+        if (classification.type === "unique") {
+            systemWarning.innerHTML = `
+                ✅ <strong>Megjegyzés:</strong>
+                Minden változóhoz tartozik pivot, ezért
+                <strong>egyértelmű megoldás</strong> várható.
+            `;
+            return;
+        }
+
+        if (classification.pivotColumns.length === maxPossiblePivots && colCount > maxPossiblePivots) {
+            systemWarning.innerHTML = `
+                ℹ️ <strong>Megjegyzés:</strong>
+                Már megvan a maximálisan lehetséges pivotszám, de maradtak szabad változók,
+                ezért a rendszernek <strong>végtelen sok megoldása van</strong>.
+            `;
+            return;
+        }
+
+        systemWarning.innerHTML = `
+            ℹ️ <strong>Megjegyzés:</strong>
+            A rendszer jelenleg még átalakítás alatt van. Ha maradnak szabad változók
+            és nincs ellentmondás, akkor <strong>végtelen sok megoldás</strong> lesz.
+        `;
+    }
+
+    function firstNonZeroColumn(row) {
+        for (let c = 0; c < row.length; c++) {
+            if (!nearlyZero(row[c])) return c;
+        }
+        return -1;
+    }
+
+    function normalizeLabel(label) {
+        return String(label).replace(/\s/g, "");
+    }
+
+    function nearlyZero(x) {
+        return Math.abs(x) < 1e-9;
+    }
+
+    function nearlyEqual(a, b) {
+        return Math.abs(a - b) < 1e-9;
+    }
+
+    function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function randomNonZeroInt(min, max) {
+        let x = 0;
+        while (x === 0) x = randomInt(min, max);
+        return x;
     }
 });
+
+/**
+ * Számot törtté alakít
+ */
+function formatAsFraction(num) {
+    if (num === null || num === undefined || isNaN(num)) return "?";
+    if (!isFinite(num)) return num > 0 ? "∞" : "-∞";
+
+    if (Math.abs(Math.round(num) - num) < 1e-10) {
+        return Math.round(num).toString();
+    }
+
+    const sign = num < 0 ? "-" : "";
+    const n = Math.abs(num);
+    const limit = 1e-10;
+
+    let h1 = 1, h2 = 0, k1 = 0, k2 = 1;
+    let b = n;
+
+    for (let i = 0; i < 20; i++) {
+        const a = Math.floor(b);
+
+        const auxH = h1;
+        h1 = a * h1 + h2;
+        h2 = auxH;
+
+        const auxK = k1;
+        k1 = a * k1 + k2;
+        k2 = auxK;
+
+        if (Math.abs(n - h1 / k1) < limit) break;
+
+        const remainder = b - a;
+        if (Math.abs(remainder) < 1e-12) break;
+
+        b = 1 / remainder;
+    }
+
+    return sign + h1 + "/" + k1;
+}
+
+function toLatexNumber(num) {
+    const s = formatAsFraction(num);
+
+    if (s.includes("/")) {
+        const idx = s.indexOf("/");
+        const nume = s.slice(0, idx);
+        const deno = s.slice(idx + 1);
+        return `\\frac{${nume}}{${deno}}`;
+    }
+
+    return s;
+}
+
+function toLatexCoeff(num) {
+    if (Math.abs(num - 1) < 1e-10) return "";
+    return toLatexNumber(num);
+}
 
 ********************************************
 ********************************************
@@ -4263,143 +4683,6 @@ applications.html
 
 ********************************************
 ********************************************
-basics.html
-********************************************
-********************************************
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alapok – Pivot Point</title>
-
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']]
-      },
-      svg: { fontCache: 'global' }
-    };
-  </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-
-  <link rel="stylesheet" href="css/styles.css" />
-</head>
-<body>
-  
-  <header>
-    <div class="nav-container">
-      <a href="index.html" class="logo logo-link" aria-label="Vissza a főoldalra">
-        <div class="logo-badge">P</div>
-        <div>Pivot Point</div>
-      </a>
-      
-      <div class="nav-links-wrapper">
-        <a href="index.html" class="btn-nav-primary" style="text-decoration: none; display: inline-block;">
-          Vissza a kezdőlapra
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <section class="section">
-      <div class="section-card">
-        <h1 class="section-title">Lineáris Algebra Alapok</h1>
-        
-        <p class="section-lead">
-          Mielőtt belevágnál a bonyolultabb műveletekbe (mint a pivotálás vagy inverz számítás), 
-          fontos tisztázni az alapfogalmakat. Mi az a mátrix? Hogyan jelöljük? 
-          Milyen speciális típusok léteznek?
-        </p>
-
-        <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
-
-        <div class="theory-content" style="max-width: 800px; margin: 0 auto; line-height: 1.8; color: #4a3b32;">
-          
-          <h3 style="color:var(--color-primary); margin-top:1.5rem; margin-bottom: 0.5rem;">1. Mátrix definíciója</h3>
-          <p>
-            A mátrix egy számokból álló téglalap alakú táblázat. A számokat a mátrix <strong>elemeinek</strong> nevezzük.
-            Egy $m \times n$-es mátrixnak $m$ darab sora és $n$ darab oszlopa van.
-          </p>
-          <p>
-            Általános jelölése:
-            $$
-            A = \begin{pmatrix}
-            a_{11} & a_{12} & \cdots & a_{1n} \\
-            a_{21} & a_{22} & \cdots & a_{2n} \\
-            \vdots & \vdots & \ddots & \vdots \\
-            a_{m1} & a_{m2} & \cdots & a_{mn}
-            \end{pmatrix}
-            $$
-            Ahol $a_{ij}$ az $i$-edik sor és $j$-edik oszlop metszéspontjában álló elem.
-          </p>
-
-          <h3 style="color:var(--color-primary); margin-top:2.5rem; margin-bottom: 0.5rem;">2. Speciális mátrixok</h3>
-          <ul style="list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem;">
-            <li>
-              <strong>Négyzetes mátrix:</strong> Ahol a sorok és oszlopok száma megegyezik ($n = m$, azaz $n \times n$).
-            </li>
-            <li>
-              <strong>Egységmátrix ($I$ vagy $E$):</strong> Olyan négyzetes mátrix, amelynek főátlójában (bal felső saroktól a jobb alsóig) csupa <strong>1</strong>-es, mindenhol máshol <strong>0</strong> áll.
-              $$ I_3 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} $$
-            </li>
-            <li>
-              <strong>Zérómátrix ($0$):</strong> Minden eleme 0.
-            </li>
-            <li>
-              <strong>Háromszögmátrix:</strong>
-              <ul>
-                <li><em>Felső háromszögmátrix:</em> A főátló alatt csupa 0 áll.</li>
-                <li><em>Alsó háromszögmátrix:</em> A főátló felett csupa 0 áll.</li>
-              </ul>
-            </li>
-          </ul>
-
-          <h3 style="color:var(--color-primary); margin-top:2.5rem; margin-bottom: 0.5rem;">3. Elemi sorműveletek</h3>
-          <p>
-            A Gauss-elimináció (és a Pivot Point alkalmazás) során háromféle "megengedett" műveletet végezhetünk a mátrix sorain.
-            Ezeket elemi átalakításoknak hívjuk, mert <strong>nem változtatják meg</strong> az egyenletrendszer megoldáshalmazát,
-            sem a mátrix rangját.
-          </p>
-          <ol style="margin-left: 1.5rem; margin-top: 1rem;">
-            <li style="margin-bottom: 0.5rem;">
-              <strong>Sorcsere:</strong> Két tetszőleges sor felcserélése ($S_i \leftrightarrow S_j$).
-            </li>
-            <li style="margin-bottom: 0.5rem;">
-              <strong>Skalárral szorzás:</strong> Egy sor minden elemének megszorzása egy nem nulla számmal ($S_i \leftarrow c \cdot S_i$).
-              <br><small style="color:#7b6454;">(Ezt használjuk a főátló 1-esre hozásához, pl. osztás a pivot elemmel.)</small>
-            </li>
-            <li style="margin-bottom: 0.5rem;">
-              <strong>Sor hozzáadása:</strong> Egy sorhoz hozzáadni egy másik sor tetszőleges számszorosát ($S_i \leftarrow S_i + c \cdot S_j$).
-              <br><small style="color:#7b6454;">(Ezt használjuk a kinullázáshoz, azaz az eliminációhoz.)</small>
-            </li>
-          </ol>
-
-          <div style="margin-top: 4rem; text-align: center;">
-            <p style="margin-bottom: 1rem;">Most, hogy ismered az alapokat, vágj bele a gyakorlásba!</p>
-            <a href="index.html" class="btn-main btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
-              Vissza a menübe
-            </a>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="footer-bottom">
-      <span>© 2026 Pivot Point</span>
-    </div>
-  </footer>
-
-</body>
-</html>
-
-********************************************
-********************************************
 create_matrix.html
 ********************************************
 ********************************************
@@ -4428,6 +4711,13 @@ create_matrix.html
         <div class="logo-badge">P</div>
         <div>Pivot Point</div>
       </a>
+
+      <div class="nav-links-wrapper">
+        <a href="index.html" class="btn-nav-primary" style="text-decoration: none; display: inline-block;">
+          ← Vissza a kezdőlapra
+        </a>
+      </div>
+
     </div>
   </header>
 
@@ -4754,8 +5044,6 @@ index.html
 
         <nav>
           <ul id="nav-links">
-            <li><a href="#celunk">Célunk</a></li>
-            <li><a href="#miert">Miért LinAlg?</a></li>
             <li><a href="#otos">5-ösre készülök</a></li>
             <li>
               <button
@@ -4783,18 +5071,13 @@ index.html
         </h1>
 
         <p class="hero-subtitle">
-          A jelenlegi demó 3×3-as mátrixokkal foglalkozó feladatokat generál:
-          pivotálás, mátrixinverz, determináns, lineáris egyenletrendszer.
-          Minden feladatnak „szép”, egész elemes megoldása van.
+          A Pivot Point egy oktatást segítő eszköz, amely lineáris algebra vizsgafeladatok és ZH-k gyors generálásában segít.
         </p>
 
         <div class="hero-actions">
           <a href="#zh-generator" class="btn-main btn-primary">
             Feladat generálása
             <span>➜</span>
-          </a>
-          <a href="#celunk" class="btn-main btn-secondary">
-            Mi a weboldal célja?
           </a>
         </div>
 
@@ -4805,13 +5088,6 @@ index.html
       </div>
 
       <aside class="hero-card" aria-label="ZH generátor rövid leírás">
-        <div class="hero-card-header">
-          <div>
-            <div class="hero-card-title">Aktuális demó</div>
-            <small>3×3-as feladatok</small>
-          </div>
-          <div class="hero-badge">LA ZH</div>
-        </div>
 
         <div class="hero-card-list">
           <div class="hero-card-item">
@@ -4836,51 +5112,19 @@ index.html
           </div>
         </div>
 
-        <div class="hero-card-footer">
-          <span>Alap demó – később jönnek a további feladattípusok.</span>
-          <span>A PDF-nél használd a böngésző „Mentés PDF-be” opcióját.</span>
-        </div>
       </aside>
     </section>
 
-    <!-- CÉLUNK -->
-    <section id="celunk" class="section no-print">
-      <div class="section-card section-card-light">
-        <h2 class="section-title">Mi a weboldal célja?</h2>
-        <p class="section-lead">
-          A <strong>Pivot Point</strong> egy oktatást segítő eszköz, amely
-          lineáris algebra vizsgafeladatok és ZH-k gyors generálásában segít.
-          A jelenlegi prototípus 3×3-as mátrixokra épülő feladatokra koncentrál.
-        </p>
-      </div>
-    </section>
 
-    <!-- MIÉRT LINEÁRIS ALGEBRA? -->
-    <section id="miert" class="section no-print">
-      <div class="section-card section-card-alt">
-        <h2 class="section-title">Minek tanuljak Lineáris Algebrát?</h2>
-        <p class="section-lead">
-          A lineáris algebra az adatelemzés, optimalizálás, gépi tanulás,
-          számítógépes grafika és sok más terület alapnyelve.
-        </p>
-      </div>
-    </section>
+    
 
     <!-- 5-ÖSRE KÉSZÜLÖK -->
 <section id="otos" class="section no-print">
       <div class="section-card section-card-light">
         <h2 class="section-title">Legyen neked is 5-ös Lineáris Algebrából</h2>
         <p class="section-lead">
-          Válassz egy témakört a gyakorláshoz. Kezdd az elmélettel, majd mélyítsd el a tudást a gyakorlati feladatokkal!
+          Válassz egy témakört a gyakorláshoz. Mélyítsd el a tudást a gyakorlati feladatokkal!
         </p>
-
-        <h3 class="grid-category-title">Elmélet</h3>
-        <div class="practice-grid">
-          <a href="basics.html" class="practice-card">
-            <span class="practice-icon" style="background-color: #5d4037;">A</span>
-            <span>Alapok</span>
-          </a>
-        </div>
 
         <h3 class="grid-category-title">Gyakorlat</h3>
         <div class="practice-grid">
@@ -4906,7 +5150,7 @@ index.html
           </a>
 
           <a href="create_matrix.html" class="practice-card">
-            <span class="practice-icon" style="background-color: #bcaaa4;">M</span>
+            <span class="practice-icon">M</span>
             <span>Mátrix létrehozás</span>
           </a>
 
@@ -4923,10 +5167,9 @@ index.html
             <p class="section-lead">
               Add meg, hány ZH-változatot szeretnél (pl. 5), válaszd ki a
               feladattípusokat, majd generáld le a feladatsort.
-              A megoldókulcs minden feladat alatt jelenik meg (weben kapcsolható).
+              A megoldókulcs minden feladat alatt jelenik meg.
             </p>
           </div>
-          <div class="badge-soft no-print">Alfa verzió</div>
         </div>
 
         <div class="zh-layout">
@@ -5007,12 +5250,7 @@ index.html
             </div>
 
             <p class="note-small">
-              <strong>Feladatsor generálása</strong> – weben megjelenik az összes
-              kiválasztott feladattípus, minden ZH-változatnál.<br />
-              <strong>Feladatlap PDF</strong> – csak a feladatok, minden ZH-változat
-              külön oldalon.<br />
-              <strong>Feladat + megoldás PDF</strong> – minden feladat alatt a saját
-              megoldása, a ZH-változatok külön oldalon. Nyomtatásnál a további beállításoknál kapcsold ki a fej- és láblécet.
+              Nyomtatásnál a további beállításoknál kapcsold ki a fej- és láblécet.
             </p>
           </form>
 
@@ -5054,8 +5292,6 @@ index.html
         >
           GitHub – forráskód
         </a>
-        <a href="#celunk" class="footer-link">About</a>
-        <a href="mailto:your.email@example.com" class="footer-link">Contact</a>
       </div>
     </div>
 
@@ -5316,73 +5552,6 @@ pivot.html
 
 ********************************************
 ********************************************
-proba.html
-********************************************
-********************************************
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-  <meta charset="UTF-8">
-  <title>3x3 mátrix PDF-hez</title>
-
-  <!-- MathJax beállítás -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      },
-      svg: { fontCache: 'global' }
-    };
-  </script>
-
-  <!-- MathJax betöltése -->
-  <script id="MathJax-script" async
-          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-  </script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-    }
-
-    .actions {
-      margin-bottom: 1.5rem;
-    }
-
-    /* Nyomtatáshoz: a gomb ne látszódjon a PDF-ben */
-    @media print {
-      .actions {
-        display: none;
-      }
-    }
-  </style>
-</head>
-<body>
-  <h1>3×3 mátrix példa</h1>
-
-  <div class="actions">
-    <button onclick="window.print()">Letöltés PDF-be</button>
-  </div>
-
-  <p>A következő egy 3×3-as mátrix:</p>
-
-  <p>
-    $$
-    A = \begin{pmatrix}
-      1 & 2 & 3 \\\\
-      4 & 5 & 6 \\\\
-      7 & 8 & 9
-    \end{pmatrix}
-    $$
-  </p>
-</body>
-</html>
-
-
-********************************************
-********************************************
 system.html
 ********************************************
 ********************************************
@@ -5392,25 +5561,26 @@ system.html
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Egyenletrendszer – Pivot Point</title>
-  
+
   <script>
-    window.MathJax = { 
-      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, 
-      svg: { fontCache: 'global' } 
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
     };
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  
+
   <header>
     <div class="nav-container">
       <a href="index.html" class="logo logo-link" aria-label="Vissza a főoldalra">
         <div class="logo-badge">P</div>
         <div>Pivot Point</div>
       </a>
-      
+
       <div class="nav-links-wrapper">
         <a href="index.html" class="btn-nav-primary" style="text-decoration: none; display: inline-block;">
           ← Vissza a kezdőlapra
@@ -5422,38 +5592,53 @@ system.html
   <main>
     <section class="section">
       <div class="section-card">
-        <h1 class="section-title">Lineáris Egyenletrendszerek ($Ax = b$)</h1>
-        
+
+        <h1 class="section-title">Lineáris Egyenletrendszerek (\(Aa=b\))</h1>
+
         <p class="section-lead">
-          Oldjunk meg egyenletrendszereket lépésről lépésre Gauss-Jordan eliminációval! 
-          Hozzuk az $[A \mid b]$ kibővített mátrixot egységmátrix alakra, így a jobb oldali oszlopban megkapjuk az $x$ vektor (az ismeretlenek) értékeit.
+          Oldjunk meg egyenletrendszereket lépésről lépésre Gauss–Jordan eliminációval!
+          Most már nemcsak négyzetes, hanem általános \(m \times n\) mátrixokat is kezelünk
+          (például \(2 \times 5\)).
         </p>
+
         <p style="margin-bottom: 2rem; color: #6b5241;">
-          <strong>Hogyan használd?</strong> Add meg az egyenletek (és változók) számát. Töltsd ki az $A$ együtthatómátrixot, és a jobb oldalon a $b$ oszlopot (az egyenlőség jobb oldalán lévő számokat).
+          <strong>Hogyan használd?</strong>
+          Add meg a sorok számát (egyenletek száma) és az oszlopok számát (ismeretlenek száma).
+          Töltsd ki az \(A\) együtthatómátrixot, és a jobb oldalon a \(b\) oszlopot.
+          A bázis kezdetben az \(e_1, e_2, \dots\) változókból áll, majd pivotáláskor ezek helyére
+          az \(a_1, a_2, \dots\) változók léphetnek.
         </p>
 
         <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
 
         <div id="system-app-container" class="app-container">
-          
+
           <div class="control-panel">
             <div class="field-group field-group-inline">
-              <label for="matrix-size" class="field-label">Ismeretlenek száma ($n$)</label>
-              <input type="number" id="matrix-size" value="3" min="2" max="5" class="input-sm" />
+              <label for="matrix-rows" class="field-label">Sorok száma (\(m\))</label>
+              <input type="number" id="matrix-rows" value="3" min="1" max="6" class="input-sm" />
             </div>
+
+            <div class="field-group field-group-inline">
+              <label for="matrix-cols" class="field-label">Oszlopok száma / ismeretlenek (\(n\))</label>
+              <input type="number" id="matrix-cols" value="3" min="1" max="6" class="input-sm" />
+            </div>
+
             <button id="btn-create-grid" class="btn-main btn-primary">
               Mátrix keret létrehozása
             </button>
           </div>
 
           <div id="matrix-input-wrapper" class="matrix-input-wrapper hidden">
-            <p class="instruction-text">Töltsd ki az együtthatókat ($A$) és a jobb oldalt ($b$):</p>
-            
+            <p class="instruction-text">
+              Töltsd ki az együtthatókat (\(A\)) és a jobb oldalt (\(b\)):
+            </p>
+
             <div id="matrix-grid" class="matrix-grid"></div>
-            
+
             <div class="action-buttons">
               <button id="btn-fill-random" class="btn-main btn-secondary" style="margin-right: 0.5rem;">
-                Véletlen kitöltés (Mindig egész megoldás!)
+                Véletlen kitöltés
               </button>
               <button id="btn-show-matrix" class="btn-main btn-primary">
                 Számítás indítása
@@ -5462,11 +5647,23 @@ system.html
           </div>
 
           <div id="matrix-display-area" class="matrix-display-area hidden">
-            <h3 id="step-title">Induló állapot $[A \mid b]$</h3>
-            
-            <div id="singular-warning" class="error-banner hidden">
-              ⚠️ <strong>Figyelem:</strong> Az együtthatómátrix determinánsa <strong>0</strong>. A rendszernek vagy nincs egyértelmű megoldása, vagy végtelen sok van!
-            </div>
+            <h3 id="step-title">Induló állapot \([A \mid b]\)</h3>
+
+            <div
+              id="basis-info"
+              style="
+                margin: 1rem auto 1.25rem;
+                max-width: 900px;
+                background: rgba(244, 228, 210, 0.45);
+                border: 1px solid rgba(123, 74, 45, 0.15);
+                border-radius: 12px;
+                padding: 0.9rem 1rem;
+                color: #5f4939;
+                text-align: left;
+              "
+            ></div>
+
+            <div id="system-warning" class="error-banner hidden"></div>
 
             <div id="latex-output" class="math-display" style="width: 100%;"></div>
 
