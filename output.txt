@@ -1284,7 +1284,7 @@ input[type="number"] {
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-  display: none; /* Alapból rejtve, csak aktívnál látszik */
+  /* display: none; /* Alapból rejtve, csak aktívnál látszik */*/
 }
 
 .op-card.active .btn-op-exec {
@@ -1313,6 +1313,10 @@ input[type="number"] {
 /* =========================
    ZH GENERÁTOR CHECKBOXOK (MODERN STÍLUS)
 ========================= */
+
+.hidden-field {
+  display: none !important;
+}
 
 /* A konténer elrendezése */
 #zh-form .field-row {
@@ -1450,6 +1454,77 @@ input[type="number"] {
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================
+   PDF MODAL (ELMÉLET)
+========================= */
+
+/* A theory-btn gombok resetelése, hogy úgy nézzenek ki, mint az a tag-es kártyák */
+button.practice-card {
+  width: 100%;
+  text-align: left;
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+}
+
+.pdf-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.pdf-modal.hidden {
+  display: none !important;
+  opacity: 0;
+}
+
+.pdf-modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 1000px;
+  height: 85vh;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+.pdf-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(123, 74, 45, 0.1);
+  background: #fdf7ef;
+}
+
+.pdf-modal-header h3 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+}
+
+#pdf-viewer {
+  flex: 1;
+  width: 100%;
+  background-color: #525659; /* Általános PDF olvasó háttérszín */
+  border: none;
 }
 
 ********************************************
@@ -1724,6 +1799,50 @@ async function incrementGenCount() {
         console.error("Számláló hiba:", error);
     }
 }
+
+/* ========= PDF MODAL KEZELÉSE ========= */
+document.addEventListener("DOMContentLoaded", () => {
+  const theoryBtns = document.querySelectorAll(".theory-btn");
+  const pdfModal = document.getElementById("pdf-modal");
+  const pdfModalClose = document.getElementById("pdf-modal-close");
+  const pdfViewer = document.getElementById("pdf-viewer");
+  const pdfModalTitle = document.getElementById("pdf-modal-title");
+
+  if (theoryBtns.length > 0 && pdfModal) {
+    theoryBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const pdfUrl = btn.getAttribute("data-pdf");
+        const topicName = btn.querySelector("span:nth-child(2)").textContent;
+        
+        // Cím frissítése
+        pdfModalTitle.textContent = topicName + " – Elméleti összefoglaló";
+        
+        // PDF betöltése (a böngésző beépített olvasójával)
+        pdfViewer.src = pdfUrl;
+        
+        // Ablak megjelenítése és háttér görgetésének tiltása
+        pdfModal.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      });
+    });
+
+    const closeModal = () => {
+      pdfModal.classList.add("hidden");
+      pdfViewer.src = ""; // Kiürítjük, hogy ne fusson a háttérben
+      document.body.style.overflow = ""; // Görgő visszaállítása
+    };
+
+    // Bezárás gombra kattintva
+    pdfModalClose.addEventListener("click", closeModal);
+
+    // Ha a sötét háttérre kattintasz a dobozon kívül, akkor is bezár
+    pdfModal.addEventListener("click", (e) => {
+      if (e.target === pdfModal) {
+        closeModal();
+      }
+    });
+  }
+});
 
 ********************************************
 ********************************************
@@ -4817,7 +4936,7 @@ create_matrix.html
                 <button class="btn-op-exec" onclick="executeRowCalc()">Végrehajtás</button>
               </div>
 
-              <div class="op-card" id="op-col-calc">
+              <!--<div class="op-card" id="op-col-calc">
                 <div class="op-title">Oszlopművelet ($C_i \leftarrow C_i + k \cdot C_j$)</div>
                 <div class="op-inputs-complex">
                   <div>
@@ -4834,7 +4953,7 @@ create_matrix.html
                   </div>
                 </div>
                 <button class="btn-op-exec" onclick="executeColCalc()">Végrehajtás</button>
-              </div>
+              </div>-->
 
             </div>
             
@@ -5107,7 +5226,7 @@ index.html
           <div class="hero-card-item">
             <div class="hero-card-bullet">3</div>
             <div>
-              Kétféle PDF: csak feladatok vagy feladat + megoldás, oldaltörésekkel.
+              Töltsd le a PDF formában!
             </div>
           </div>
         </div>
@@ -5126,13 +5245,33 @@ index.html
           Válassz egy témakört a gyakorláshoz. Mélyítsd el a tudást a gyakorlati feladatokkal!
         </p>
 
-        <h3 class="grid-category-title">Gyakorlat</h3>
+<h3 class="grid-category-title">Elmélet (Letölthető jegyzetek)</h3>
         <div class="practice-grid">
           
-          <a href="pivot.html" class="practice-card">
-            <span class="practice-icon">P</span>
+          <button class="practice-card theory-btn" data-pdf="pdfs/matrix_and_inverse.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">M</span>
+            <span>Mátrixok és Inverz számítás</span>
+          </button>
+
+          <button class="practice-card theory-btn" data-pdf="pdfs/pivot.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">P</span>
             <span>Pivotálás</span>
-          </a>
+          </button>
+
+          <button class="practice-card theory-btn" data-pdf="pdfs/determinans.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">D</span>
+            <span>Determináns</span>
+          </button>
+
+          <button class="practice-card theory-btn" data-pdf="pdfs/egyenletrendszer.pdf">
+            <span class="practice-icon" style="background: var(--color-accent); color: var(--color-text);">E</span>
+            <span>Egyenletrendszer</span>
+          </button>
+
+        </div>
+
+        <h3 class="grid-category-title">Gyakorlat</h3>
+        <div class="practice-grid">
 
           <a href="inverse.html" class="practice-card">
             <span class="practice-icon">I</span>
@@ -5194,21 +5333,21 @@ index.html
             <div class="field-group">
               <div class="field-label">Feladattípusok</div>
               <div class="field-row">
-                <label>
-                  <input type="checkbox" id="type-pivot" checked>
-                  1. Pivotálás
+                <label class="hidden-field">
+                  <input type="checkbox" id="type-pivot">
+                  0. Pivotálás
                 </label>
                 <label>
                   <input type="checkbox" id="type-inverse" checked>
-                  2. Mátrixinverz
+                  1. Mátrixinverz
                 </label>
                 <label>
                   <input type="checkbox" id="type-det" checked>
-                  3. Determináns
-                </label>
+                  2. Determináns
+                </label>  
                 <label>
                   <input type="checkbox" id="type-system" checked>
-                  4. Egyenletrendszer
+                  3. Egyenletrendszer
                 </label>
               </div>
               <span class="field-hint">
@@ -5220,14 +5359,14 @@ index.html
               <button type="button" id="btn-generate-zh" class="btn-main btn-primary">
                 Feladatsor generálása
               </button>
-              <button
+            <!--<button
                 type="button"
                 id="btn-show-solutions"
                 class="btn-main btn-secondary"
                 disabled
               >
                 Megoldókulcs megjelenítése
-              </button>
+              </button>-->
               <button
                 type="button"
                 id="btn-print-tasks"
@@ -5235,13 +5374,13 @@ index.html
               >
                 Feladatlap PDF
               </button>
-              <button
+              <!--<button
                 type="button"
                 id="btn-print-all"
                 class="btn-main btn-secondary"
               >
                 Feladat + megoldás PDF
-              </button>
+              </button>-->
             </div>
 
             <div id="gen-result-container" class="generation-result hidden">
@@ -5270,6 +5409,17 @@ index.html
         </div>
       </div>
     </section>
+
+    <div id="pdf-modal" class="pdf-modal hidden">
+      <div class="pdf-modal-content">
+        <div class="pdf-modal-header">
+          <h3 id="pdf-modal-title">Elméleti jegyzet</h3>
+          <button id="pdf-modal-close" class="btn-main btn-secondary" style="padding: 0.4rem 1rem;">Bezárás</button>
+        </div>
+        <iframe id="pdf-viewer" src="" frameborder="0" width="100%" height="100%"></iframe>
+      </div>
+    </div>
+
   </main>
 
   <!-- FOOTER -->
@@ -5480,11 +5630,6 @@ pivot.html
           Gyakorold a Gauss-elimináció lépéseit! Adj meg egy mátrixot, válassz pivot elemet, 
           és a rendszer elvégzi a számolást lépésről lépésre.
         </p>
-        <p style="margin-bottom: 2rem; color: #6b5241;">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac scelerisque lectus. 
-          Vivamus quis erat nec nisi vehicula interdum. A Gauss-Jordan elimináció során célunk, 
-          hogy a pivot elemek segítségével nullázzuk az oszlopok többi elemét.
-        </p>
 
         <hr style="border: 0; border-top: 1px dashed rgba(123,74,45,0.2); margin-bottom: 2rem;">
 
@@ -5649,7 +5794,18 @@ system.html
           <div id="matrix-display-area" class="matrix-display-area hidden">
             <h3 id="step-title">Induló állapot \([A \mid b]\)</h3>
 
-            <div
+
+
+            <div id="latex-output" class="math-display" style="width: 100%;"></div>
+
+            <div id="step-controls" class="step-controls hidden" style="margin-top: 1.5rem;">
+              <p id="selected-pivot-info" style="margin-bottom: 1rem; font-weight: bold; color: #7b4a2d;"></p>
+              <button id="btn-perform-step" class="btn-main btn-primary">
+                Kiválasztott lépés végrehajtása
+              </button>
+            </div>
+
+                        <div
               id="basis-info"
               style="
                 margin: 1rem auto 1.25rem;
@@ -5663,16 +5819,8 @@ system.html
               "
             ></div>
 
-            <div id="system-warning" class="error-banner hidden"></div>
+            <div id="system-warning" class="error-banner hidden" style="display: none !important;"></div>
 
-            <div id="latex-output" class="math-display" style="width: 100%;"></div>
-
-            <div id="step-controls" class="step-controls hidden" style="margin-top: 1.5rem;">
-              <p id="selected-pivot-info" style="margin-bottom: 1rem; font-weight: bold; color: #7b4a2d;"></p>
-              <button id="btn-perform-step" class="btn-main btn-primary">
-                Kiválasztott lépés végrehajtása
-              </button>
-            </div>
           </div>
 
         </div>

@@ -1309,6 +1309,10 @@ input[type="number"] {
    ZH GENERÁTOR CHECKBOXOK (MODERN STÍLUS)
 ========================= */
 
+.hidden-field {
+  display: none !important;
+}
+
 /* A konténer elrendezése */
 #zh-form .field-row {
   display: flex;
