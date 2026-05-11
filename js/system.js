@@ -1,13 +1,6 @@
 // ======================
 // SYSTEM.JS – Általános lineáris egyenletrendszer megoldó (Gauss-Jordan / RREF)
 // Kezel: m x n mátrixokat is, pl. 2x5, 3x6
-// MÓDOSÍTVA:
-// - e1, e2, ... bázisváltozók megjelenítése
-// - a1, a2, ... oszlopváltozók megjelenítése
-// - pivot után a bázis automatikusan frissül
-// - a végső megoldásban x helyett a szerepel
-// - nincs "Bázis" felirat bal fent
-// - a b oszlop előtt nincsenek sorfeliratok
 // ======================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -461,12 +454,18 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         }
 
-        const maxPossiblePivots = Math.min(rowCount, colCount);
+        // Számoljuk meg a "nem csupa nulla" sorokat
+        let nonZeroRows = 0;
+        for (let r = 0; r < rowCount; r++) {
+            if (!matA[r].every(v => nearlyZero(v))) {
+                nonZeroRows++;
+            }
+        }
 
+        // Ha minden nem nulla sorhoz sikerült találni egy tökéletes pivot oszlopot
         if (
             classification.type === "infinite" &&
-            classification.pivotColumns.length === maxPossiblePivots &&
-            isReadableForParametricSolution(matA, classification)
+            classification.pivotColumns.length === nonZeroRows
         ) {
             return {
                 done: true,
@@ -480,21 +479,6 @@ document.addEventListener("DOMContentLoaded", () => {
             classification,
             reason: null
         };
-    }
-
-    function isReadableForParametricSolution(matA, classification) {
-        for (const pCol of classification.pivotColumns) {
-            const pRow = classification.pivotRowByCol[pCol];
-            if (pRow === undefined) return false;
-
-            for (let r = 0; r < rowCount; r++) {
-                const expected = (r === pRow) ? 1 : 0;
-                if (!nearlyEqual(matA[r][pCol], expected)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     function showFinalSolution(container, classification, reason) {
@@ -600,31 +584,38 @@ document.addEventListener("DOMContentLoaded", () => {
         const m = rowCount;
         const n = colCount;
 
-        let pivotColumns = [];
-        let pivotRowByCol = {};
-
+        // 1. Ellentmondás ellenőrzése
         for (let r = 0; r < m; r++) {
             const rowZero = matA[r].every(v => nearlyZero(v));
             if (rowZero && !nearlyZero(vecB[r][0])) {
                 return { type: "inconsistent" };
             }
+        }
 
-            const lead = firstNonZeroColumn(matA[r]);
-            if (lead !== -1 && nearlyEqual(matA[r][lead], 1)) {
-                let isPivotCol = true;
+        let pivotColumns = [];
+        let pivotRowByCol = {};
+        let usedRows = new Set();
 
-                for (let rr = 0; rr < m; rr++) {
-                    if (rr === r) continue;
-                    if (!nearlyZero(matA[rr][lead])) {
-                        isPivotCol = false;
-                        break;
-                    }
+        // 2. Pivot oszlopok keresése (BÁRMELYIK oszlop lehet pivot)
+        for (let c = 0; c < n; c++) {
+            let oneCount = 0;
+            let zeroCount = 0;
+            let possibleRow = -1;
+
+            for (let r = 0; r < m; r++) {
+                if (nearlyEqual(matA[r][c], 1)) {
+                    oneCount++;
+                    possibleRow = r;
+                } else if (nearlyZero(matA[r][c])) {
+                    zeroCount++;
                 }
+            }
 
-                if (isPivotCol) {
-                    pivotColumns.push(lead);
-                    pivotRowByCol[lead] = r;
-                }
+            // Ha az oszlop tiszta bázisvektor
+            if (oneCount === 1 && zeroCount === m - 1 && !usedRows.has(possibleRow)) {
+                pivotColumns.push(c);
+                pivotRowByCol[c] = possibleRow;
+                usedRows.add(possibleRow);
             }
         }
 
@@ -656,7 +647,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateSystemWarning() {
         const classification = classifySystem(currentMatrixA, currentVectorB);
-        const maxPossiblePivots = Math.min(rowCount, colCount);
+        
+        let nonZeroRows = 0;
+        for (let r = 0; r < rowCount; r++) {
+            if (!currentMatrixA[r].every(v => nearlyZero(v))) {
+                nonZeroRows++;
+            }
+        }
 
         systemWarning.classList.remove("hidden");
 
@@ -678,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (classification.pivotColumns.length === maxPossiblePivots && colCount > maxPossiblePivots) {
+        if (classification.pivotColumns.length === nonZeroRows && colCount > nonZeroRows) {
             systemWarning.innerHTML = `
                 ℹ️ <strong>Megjegyzés:</strong>
                 Már megvan a maximálisan lehetséges pivotszám, de maradtak szabad változók,
@@ -692,13 +689,6 @@ document.addEventListener("DOMContentLoaded", () => {
             A rendszer jelenleg még átalakítás alatt van. Ha maradnak szabad változók
             és nincs ellentmondás, akkor <strong>végtelen sok megoldás</strong> lesz.
         `;
-    }
-
-    function firstNonZeroColumn(row) {
-        for (let c = 0; c < row.length; c++) {
-            if (!nearlyZero(row[c])) return c;
-        }
-        return -1;
     }
 
     function normalizeLabel(label) {
