@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pivot Point – Lineáris Algebra ZH generátor</title>
 
-  <!-- MathJax konfiguráció (LaTeX render) -->
   <script>
     window.MathJax = {
       tex: {
@@ -17,7 +16,6 @@
     };
   </script>
 
-  <!-- MathJax: SVG output (nyomtatásban is szép) -->
   <script
     id="MathJax-script"
     async
@@ -25,9 +23,48 @@
   ></script>
 
   <link rel="stylesheet" href="css/styles.css" />
+
+  <style>
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .app-item {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(123, 74, 45, 0.1);
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.3s ease;
+    }
+    .app-item:hover {
+      transform: translateY(-5px);
+    }
+    .app-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .app-title {
+      color: var(--color-primary);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+    }
+    .theory-box {
+      background: var(--color-bg-dark);
+      color: #2a1b12;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      border-left: 4px solid var(--color-primary);
+    }
+  </style>
 </head>
 <body>
-  <!-- NAVBAR -->
   <header class="no-print">
     <div class="nav-container">
       <div class="logo">
@@ -44,6 +81,7 @@
 
         <nav>
           <ul id="nav-links">
+            <li><a href="#mire-jo">Miért LinAlg?</a></li>
             <li><a href="#otos">5-ösre készülök</a></li>
             <li>
               <button
@@ -60,7 +98,6 @@
   </header>
 
   <main>
-    <!-- HERO / KEZDŐLAP -->
     <section class="hero no-print" aria-labelledby="hero-title">
       <div class="hero-text">
         <div class="hero-kicker">Lineáris Algebra • ZH generátor</div>
@@ -115,18 +152,87 @@
       </aside>
     </section>
 
+    <section id="mire-jo" class="section no-print">
+      <div class="section-card section-card-light">
+        <h2 class="section-title">Mire jó a Lineáris Algebra a valóságban?</h2>
+        <p class="section-lead">
+          A lineáris algebra nem csak száraz egyenletekből áll. Ez a tudományág a modern technológia 
+          láthatatlan motorja, a videojátékoktól kezdve a mesterséges intelligenciáig.
+        </p>
 
-    
+        <div class="app-grid">
+          
+          <article class="app-item">
+            <span class="app-icon">🎮</span>
+            <h3 class="app-title">Videojátékok és 3D Grafika</h3>
+            <p>Minden elmozdulás, forgatás vagy kameraváltás egy 3D-s térben valójában <strong>mátrixszorzás</strong>.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> A koordinátákat vektorokként kezeljük, amiket transzformációs mátrixokkal szorzunk meg a mozgáshoz.
+            </div>
+          </article>
 
-    <!-- 5-ÖSRE KÉSZÜLÖK -->
-<section id="otos" class="section no-print">
+          <article class="app-item">
+            <span class="app-icon">📸</span>
+            <h3 class="app-title">Képfeldolgozás és Instagram filterek</h3>
+            <p>Egy digitális fotó valójában egy óriási mátrix, ahol minden cella egy pixel színét jelöli.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> A szűrők alkalmazásakor a kép-mátrix minden elemén matematikai műveleteket hajtunk végre.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">🔍</span>
+            <h3 class="app-title">Google Keresőmotor</h3>
+            <p>A Google sikerét hozó algoritmus a weboldalak fontosságát a mátrixok <strong>sajátértékei</strong> alapján számolja ki.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> Az internetet egy hatalmas szomszédsági mátrixként modellezik.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">🤖</span>
+            <h3 class="app-title">Mesterséges Intelligencia</h3>
+            <p>A ChatGPT vagy az arcfelismerők adatok milliárdjait dolgozzák fel vektorokba rendezve.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> A neuronhálók tanítása során mátrix-műveletek sorozatával optimalizálják a súlyokat.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">📍</span>
+            <h3 class="app-title">GPS Navigáció</h3>
+            <p>A telefonod helyzetének meghatározásához a műholdak jeleiből <strong>lineáris egyenletrendszereket</strong> kell megoldani.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> Legalább 4 műhold jele kell a pontos 3D koordináták kiszámításához.
+            </div>
+          </article>
+
+          <article class="app-item">
+            <span class="app-icon">🔐</span>
+            <h3 class="app-title">Titkosítás (Kriptográfia)</h3>
+            <p>Bizonyos titkosítási algoritmusok mátrixok invertálhatóságán alapulnak.</p>
+            <div class="theory-box">
+              <strong>Matematikai háttér:</strong> Hill-kódolás során a szöveget mátrixszal szorozzuk (kódolás), majd az inverzével (dekódolás).
+            </div>
+          </article>
+
+        </div>
+
+        <div style="margin-top: 4rem; text-align: center;">
+          <p style="margin-bottom: 1rem; font-weight: 600;">Szeretnél te is ezekkel foglalkozni? Kezdd a gyakorlást!</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="otos" class="section no-print">
       <div class="section-card section-card-light">
         <h2 class="section-title">Legyen neked is 5-ös Lineáris Algebrából</h2>
         <p class="section-lead">
           Válassz egy témakört a gyakorláshoz. Mélyítsd el a tudást a gyakorlati feladatokkal!
         </p>
 
-<h3 class="grid-category-title">Elmélet (Letölthető jegyzetek)</h3>
+        <h3 class="grid-category-title">Elmélet (Letölthető jegyzetek)</h3>
         <div class="practice-grid">
           
           <button class="practice-card theory-btn" data-pdf="pdfs/matrix_and_inverse.pdf">
@@ -178,7 +284,6 @@
       </div>
     </section>
 
-    <!-- ZH GENERÁTOR -->
     <section id="zh-generator" class="section">
       <div class="section-card section-zh-card">
         <div class="section-header-row">
@@ -193,7 +298,6 @@
         </div>
 
         <div class="zh-layout">
-          <!-- BAL: BEÁLLÍTÁSOK + GOMBOK (csak weben) -->
           <form id="zh-form" class="zh-form no-print" onsubmit="return false;">
             <div class="field-group field-group-inline">
               <label for="task-count" class="field-label">ZH-változatok száma</label>
@@ -210,7 +314,6 @@
               </span>
             </div>
 
-            <!-- FELADATTÍPUS-VÁLASZTÓ -->
             <div class="field-group">
               <div class="field-label">Feladattípusok</div>
               <div class="field-row">
@@ -240,14 +343,6 @@
               <button type="button" id="btn-generate-zh" class="btn-main btn-primary">
                 Feladatsor generálása
               </button>
-            <!--<button
-                type="button"
-                id="btn-show-solutions"
-                class="btn-main btn-secondary"
-                disabled
-              >
-                Megoldókulcs megjelenítése
-              </button>-->
               <button
                 type="button"
                 id="btn-print-tasks"
@@ -255,13 +350,6 @@
               >
                 Feladatlap PDF
               </button>
-              <!--<button
-                type="button"
-                id="btn-print-all"
-                class="btn-main btn-secondary"
-              >
-                Feladat + megoldás PDF
-              </button>-->
             </div>
 
             <div id="gen-result-container" class="generation-result hidden">
@@ -274,7 +362,6 @@
             </p>
           </form>
 
-          <!-- JOBB: KIMENET -->
           <div class="zh-output">
             <div class="zh-output-column">
               <h3>ZH feladatok</h3>
@@ -303,7 +390,6 @@
 
   </main>
 
-  <!-- FOOTER -->
   <footer class="site-footer no-print">
     <div class="footer-inner">
       <div class="footer-main">
@@ -326,7 +412,6 @@
       </div>
     </div>
 
-
     <div class="footer-bottom">
       <span>© 2026 Pivot Point</span>
       <span class="footer-small-note">
@@ -335,7 +420,6 @@
     </div>
   </footer>
 
-  <!-- JS fájlok -->
   <script src="js/tasks.js"></script>
   <script src="js/app.js"></script>
 </body>

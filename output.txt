@@ -4657,7 +4657,7 @@ applications.html
       svg: { fontCache: 'global' }
     };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script id="MathJax-script" async src="js/mathjax/tex-svg.js"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
   <style>
@@ -4818,7 +4818,7 @@ create_matrix.html
       svg: { fontCache: 'global' }
     };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script id="MathJax-script" async src="js/mathjax/tex-svg.js"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -4999,7 +4999,7 @@ determinant.html
       svg: { fontCache: 'global' }
     };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script id="MathJax-script" async src="js/mathjax/tex-svg.js"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
 
@@ -5481,7 +5481,7 @@ inverse.html
       svg: { fontCache: 'global' }
     };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script id="MathJax-script" async src="js/mathjax/tex-svg.js"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -5600,7 +5600,7 @@ pivot.html
       svg: { fontCache: 'global' }
     };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script id="MathJax-script" async src="js/mathjax/tex-svg.js"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -5713,7 +5713,7 @@ system.html
       svg: { fontCache: 'global' }
     };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script id="MathJax-script" async src="js/mathjax/tex-svg.js"></script>
 
   <link rel="stylesheet" href="css/styles.css" />
 </head>
